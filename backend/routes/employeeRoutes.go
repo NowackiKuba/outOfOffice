@@ -8,4 +8,5 @@ import (
 func EmployeeRoutes(server *gin.Engine) { 
 	server.POST("/employee", controllers.CreateEmployee())
 	server.GET("/employees", controllers.GetCompanyEmployees())
+	server.PATCH("/employees/:id", controllers.UpdateEmployee())
 }
