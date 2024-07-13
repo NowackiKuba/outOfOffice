@@ -19,19 +19,20 @@ import Searchbar from '../Searchbar';
 import { TLeaveRequest } from '@/types';
 import RequestDetails from '../dialogs/RequestDetails';
 import { useSearchParams } from 'next/navigation';
-
-const ApprovalRequests = ({ role }: { role: string }) => {
+import { getLeaveRequests } from '@/actions/leaveRequest.actions';
+import { format } from 'date-fns';
+const LeaveRequests = ({ role }: { role: string }) => {
   const searchParams = useSearchParams();
-  const { data: approvalRequests, isLoading } = useQuery({
+  const { data: leaveRequests, isLoading } = useQuery({
     queryKey: [
       'getApprovalRequests',
       { search: searchParams?.get('q') },
       { filter: searchParams?.get('status') },
     ],
     queryFn: async () =>
-      await getApprovalRequests({
-        search: searchParams.get('q') ? searchParams?.get('q')! : '',
-        filter: searchParams.get('status') ? searchParams?.get('status')! : '',
+      await getLeaveRequests({
+        search: searchParams?.get('q') ? searchParams?.get('q')! : '',
+        filter: searchParams?.get('status') ? searchParams?.get('status')! : '',
       }),
   });
 
@@ -40,11 +41,11 @@ const ApprovalRequests = ({ role }: { role: string }) => {
   return (
     <div className='w-full flex flex-col gap-8'>
       <div className='flex flex-col gap-4 w-full'>
-        <p className='text-3xl font-semibold'>Approval Requests</p>
+        <p className='text-3xl font-semibold'>Leave Requests</p>
         <div className='flex items-center gap-2 w-full'>
           <Searchbar
-            route='/approval-requests'
-            placeholder='Search for approval requests'
+            route='/leave-requests'
+            placeholder='Search for leave requests'
             iconPosition='left'
             otherClasses='xl:max-w-[440px] rounded-md'
           />
@@ -66,23 +67,25 @@ const ApprovalRequests = ({ role }: { role: string }) => {
             <TableRow>
               <TableHead className='w-[100px]'>ID</TableHead>
               <TableHead>From</TableHead>
-              <TableHead>Approver</TableHead>
+              <TableHead>Start Date</TableHead>
+              <TableHead>End Date</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {approvalRequests?.map((r) => (
+            {leaveRequests?.map((r) => (
               <TableRow
                 onClick={() => {
-                  setSelectedRequest(r.leave_request);
+                  setSelectedRequest(r);
                   setIsOpenDetails(true);
                 }}
                 key={r.id}
                 className='cursor-pointer'
               >
                 <TableCell>{r.id}</TableCell>
-                <TableCell>{r.leave_request.from.full_name}</TableCell>
-                <TableCell>{r.approver.full_name}</TableCell>
+                <TableCell>{r.from.full_name}</TableCell>
+                <TableCell>{format(r.start_date, 'dd.MM.yyyy')}</TableCell>
+                <TableCell>{format(r.end_date, 'dd.MM.yyyy')}</TableCell>
                 <TableCell>
                   <div
                     className={`${
@@ -106,10 +109,11 @@ const ApprovalRequests = ({ role }: { role: string }) => {
           open={isOpenDetails}
           setOpen={setIsOpenDetails}
           request={selectedRequest}
+          type='leave'
         />
       )}
     </div>
   );
 };
 
-export default ApprovalRequests;
+export default LeaveRequests;

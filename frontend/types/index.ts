@@ -1,7 +1,8 @@
 import { Dispatch, SetStateAction } from 'react';
 
 export type TEmployee = Employee;
-
+export type TApprovalRequest = ApprovalRequest;
+export type TLeaveRequest = LeaveRequest;
 interface Employee {
   id: number;
   full_name: string;
@@ -19,4 +20,24 @@ interface Employee {
 export interface DialogProps {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
+}
+
+interface LeaveRequest {
+  id: number;
+  from: TEmployee;
+  status: string;
+  start_date: Date;
+  end_date: Date;
+  absence_reason: string;
+  employee_id: number;
+  comment: string;
+}
+
+interface ApprovalRequest {
+  id: number;
+  approver: TEmployee;
+  status: string;
+  date: string;
+  reason: string;
+  leave_request: LeaveRequest;
 }

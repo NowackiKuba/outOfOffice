@@ -31,6 +31,9 @@ func main() {
 	server.Use(gin.Logger())
 	routes.EmployeeRoutes(server)
 	routes.AuthRoutes(server)
+	routes.LeaveRequestRoutes(server)
+	routes.ApprovalRequestRoutes(server)
+	routes.ProjectRoutes(server)
 
 	server.Run(":8080")
 }

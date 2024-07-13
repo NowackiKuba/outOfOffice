@@ -16,6 +16,8 @@ import {
   ArrowUp,
   Edit2,
   Edit3,
+  Eye,
+  File,
   Loader2,
   Settings,
   ShieldCheck,
@@ -221,52 +223,68 @@ const Employees = ({ role }: { role: string }) => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedEmployee(e);
-                            setIsOpenUpdate(true);
-                            setType('update');
-                          }}
-                          className='flex text-sm items-center gap-2 cursor-pointer'
-                        >
-                          <Edit3 className='h-4 w-4' />
-                          <p>Update</p>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            deactivate({
-                              email: e.email,
-                              status:
-                                e.status === 'active' ? 'inactive' : 'active',
-                              fullName: e.full_name,
-                              id: e.id,
-                              partner: e.partner,
-                              position: e.position,
-                              subDivision: e.sub_division,
-                            });
-                          }}
-                          className='flex text-sm items-center gap-2 cursor-pointer'
-                        >
-                          {e.status === 'active' ? (
-                            <>
-                              {isPending ? (
-                                <Loader2 className='h-4 w-4 animate-spin' />
-                              ) : (
-                                <ShieldX className='h-4 w-4' />
-                              )}
-                              <p>Deactivate</p>
-                            </>
-                          ) : (
-                            <>
-                              {isPending ? (
-                                <Loader2 className='h-4 w-4 animate-spin' />
-                              ) : (
-                                <ShieldCheck className='h-4 w-4' />
-                              )}
-                              <p>Activate</p>
-                            </>
-                          )}
-                        </DropdownMenuItem>
+                        {(role === 'admin' || role === 'hr') && (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedEmployee(e);
+                              setIsOpenUpdate(true);
+                              setType('update');
+                            }}
+                            className='flex text-sm items-center gap-2 cursor-pointer'
+                          >
+                            <Edit3 className='h-4 w-4' />
+                            <p>Update</p>
+                          </DropdownMenuItem>
+                        )}
+                        {(role === 'admin' || role === 'hr') && (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              deactivate({
+                                email: e.email,
+                                status:
+                                  e.status === 'active' ? 'inactive' : 'active',
+                                fullName: e.full_name,
+                                id: e.id,
+                                partner: e.partner,
+                                position: e.position,
+                                subDivision: e.sub_division,
+                              });
+                            }}
+                            className='flex text-sm items-center gap-2 cursor-pointer'
+                          >
+                            {e.status === 'active' ? (
+                              <>
+                                {isPending ? (
+                                  <Loader2 className='h-4 w-4 animate-spin' />
+                                ) : (
+                                  <ShieldX className='h-4 w-4' />
+                                )}
+                                <p>Deactivate</p>
+                              </>
+                            ) : (
+                              <>
+                                {isPending ? (
+                                  <Loader2 className='h-4 w-4 animate-spin' />
+                                ) : (
+                                  <ShieldCheck className='h-4 w-4' />
+                                )}
+                                <p>Activate</p>
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                        )}
+                        {(role === 'admin' || role === 'pm') && (
+                          <DropdownMenuItem className='flex items-center gap-2 cursor-pointer'>
+                            <Eye className='h-4 w-4' />
+                            <p>See Details</p>
+                          </DropdownMenuItem>
+                        )}
+                        {(role === 'admin' || role === 'pm') && (
+                          <DropdownMenuItem className='flex items-center gap-2 cursor-pointer'>
+                            <File className='h-4 w-4' />
+                            <p>Assign to project</p>
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>

@@ -129,3 +129,46 @@ func (e *Employee) Update() error {
 
 	return err
 }
+
+func GetEmployee(id int64) (*Employee, error) { 
+	query := `SELECT * FROM employee WHERE id = @p1`
+
+	row := db.DB.QueryRow(query, id)
+
+	var employee Employee
+
+	err := row.Scan(
+		&employee.ID,
+		&employee.FullName,
+		&employee.Email,
+		&employee.Password,
+		&employee.SubDivision,
+		&employee.Position,
+		&employee.Role,
+		&employee.Status,
+		&employee.Partner,
+		&employee.Balance,
+		&employee.Photo,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &employee, nil
+}
+
+func (e *Employee) UpdateBalance() error { 
+	query := `UPDATE employee SET balance = @p1 WHERE id = @p2`
+
+	stmt, err := db.DB.Prepare(query)
+
+	if err != nil { 
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(e.Balance, e.ID)
+
+	return err
+}
