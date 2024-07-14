@@ -42,6 +42,7 @@ const SignInForm = () => {
         title: 'Error',
         description: 'Failed to log in',
         duration: 1500,
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -70,7 +71,7 @@ const SignInForm = () => {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input {...field} placeholder='••••••••' />
+                <Input {...field} type='password' placeholder='••••••••' />
               </FormControl>
               <FormMessage />
             </FormItem>

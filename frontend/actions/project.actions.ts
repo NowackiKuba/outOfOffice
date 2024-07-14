@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import { getTokenValues } from './auth.actions';
+import { TProject } from '@/types';
 
 export const createProject = async ({
   projectType,
@@ -30,4 +31,66 @@ export const createProject = async ({
   });
 
   return res.data.message;
+};
+
+export const getProjects = async ({
+  search,
+  filter,
+}: {
+  search?: string;
+  filter?: string;
+}): Promise<TProject[]> => {
+  const res = await axios(
+    `http://localhost:8080/projects?search=${search}&filter=${filter}`,
+    {
+      method: 'GET',
+    }
+  );
+
+  return res.data.projects;
+};
+
+export const updateProject = async ({
+  projectType,
+  startDate,
+  endDate,
+  comment,
+  status,
+  id,
+}: {
+  projectType: string;
+  startDate: Date;
+  endDate: Date;
+  comment?: string;
+  status: string;
+  id: number;
+}) => {
+  const res = await axios(`http://localhost:8080/projects/${id}`, {
+    method: 'PATCH',
+    data: {
+      project_type: projectType,
+      start_date: startDate,
+      end_date: endDate,
+      comment,
+      status,
+    },
+  });
+
+  return res.data.message;
+};
+
+export const assignEmployeeToProject = async ({
+  employeeId,
+  projectId,
+}: {
+  employeeId: number;
+  projectId: number;
+}) => {
+  const res = await axios(`http://localhost:8080/projects/assign-employee`, {
+    method: 'POST',
+    data: {
+      employee_id: employeeId,
+      project_id: projectId,
+    },
+  });
 };

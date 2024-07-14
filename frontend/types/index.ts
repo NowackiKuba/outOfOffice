@@ -3,6 +3,8 @@ import { Dispatch, SetStateAction } from 'react';
 export type TEmployee = Employee;
 export type TApprovalRequest = ApprovalRequest;
 export type TLeaveRequest = LeaveRequest;
+export type TProject = Project;
+export type TEmployeeProject = EmployeeProject;
 interface Employee {
   id: number;
   full_name: string;
@@ -40,4 +42,22 @@ interface ApprovalRequest {
   date: string;
   reason: string;
   leave_request: LeaveRequest;
+}
+
+interface Project {
+  id: number;
+  project_type: string;
+  start_date: Date;
+  end_date: Date;
+  comment: string;
+  status: string;
+  project_manager: number;
+  pm: TEmployee;
+}
+
+interface EmployeeProject {
+  id: number;
+  employee_id: number;
+  project_id: number;
+  project: Project;
 }

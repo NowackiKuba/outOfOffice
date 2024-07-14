@@ -21,6 +21,11 @@ import RequestDetails from '../dialogs/RequestDetails';
 import { useSearchParams } from 'next/navigation';
 import { getLeaveRequests } from '@/actions/leaveRequest.actions';
 import { format } from 'date-fns';
+import { Button } from '../ui/button';
+import { File } from 'lucide-react';
+import CreateRequestDialog from '../dialogs/CreateRequestDialog';
+import ManageLeaveRequest from '../dialogs/ManageLeaveRequest';
+import ClearFilters from '../ClearFilters';
 const LeaveRequests = ({ role }: { role: string }) => {
   const searchParams = useSearchParams();
   const { data: leaveRequests, isLoading } = useQuery({
@@ -38,10 +43,24 @@ const LeaveRequests = ({ role }: { role: string }) => {
 
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [selectedRequest, setSelectedRequest] = useState<TLeaveRequest>();
+
+  const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false);
   return (
     <div className='w-full flex flex-col gap-8'>
       <div className='flex flex-col gap-4 w-full'>
-        <p className='text-3xl font-semibold'>Leave Requests</p>
+        <div className='flex items-center justify-between w-full'>
+          <p className='text-3xl font-semibold'>Leave Requests</p>
+          {role === 'employee' && (
+            <Button
+              onClick={() => setIsOpenCreate(true)}
+              className='flex items-center gap-2'
+              variant={'secondary'}
+            >
+              <File />
+              <p>File new request</p>
+            </Button>
+          )}
+        </div>
         <div className='flex items-center gap-2 w-full'>
           <Searchbar
             route='/leave-requests'
@@ -59,6 +78,12 @@ const LeaveRequests = ({ role }: { role: string }) => {
             placeholder='Filter by status'
             otherClassess='xl:max-w-[220px] py-4'
           />
+          {searchParams?.get('status') && (
+            <ClearFilters
+              keysToDelete={['status']}
+              searchParams={searchParams}
+            />
+          )}
         </div>
       </div>
       <div className='w-full'>
@@ -93,6 +118,8 @@ const LeaveRequests = ({ role }: { role: string }) => {
                         ? 'bg-blue-500/10 text-blue-500 dark:bg-blue-500/20 dark:text-blue-200'
                         : r.status.toLowerCase() === 'approved'
                         ? 'bg-green-500/10 text-green-500 dark:bg-green-500/20 dark:text-green-200'
+                        : r.status.toLowerCase() === 'submitted'
+                        ? 'bg-sky-400/10 text-sky-400 dark:bg-sky-400/20 dark:text-sky-200'
                         : 'bg-red-500/10 text-red-500 dark:bg-red-500/20 dark:text-red-200'
                     } rounded-md py-2 text-xs font-semibold  max-w-[100px] flex justify-center items-center`}
                   >
@@ -104,7 +131,7 @@ const LeaveRequests = ({ role }: { role: string }) => {
           </TableBody>
         </Table>
       </div>
-      {selectedRequest && (
+      {selectedRequest && role !== 'employee' && (
         <RequestDetails
           open={isOpenDetails}
           setOpen={setIsOpenDetails}
@@ -112,6 +139,15 @@ const LeaveRequests = ({ role }: { role: string }) => {
           type='leave'
         />
       )}
+      {selectedRequest && role === 'employee' && (
+        <ManageLeaveRequest
+          open={isOpenDetails}
+          setOpen={setIsOpenDetails}
+          request={selectedRequest}
+        />
+      )}
+
+      <CreateRequestDialog open={isOpenCreate} setOpen={setIsOpenCreate} />
     </div>
   );
 };

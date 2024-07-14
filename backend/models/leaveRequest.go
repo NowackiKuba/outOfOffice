@@ -18,11 +18,15 @@ type LeaveRequest struct  {
 }
 
 func (l *LeaveRequest) Create() error {
-	query := `INSERT INTO leave_requests(employee, absence_reason, start_date, end_date, comment) VALUES (@p1, @p2, @p3, @p4, @p5) SELECT SCOPE_IDENTITY() AS id`
+	query := `INSERT INTO leave_requests(employee, absence_reason, start_date, end_date, comment, status) VALUES (@p1, @p2, @p3, @p4, @p5, @p6) SELECT SCOPE_IDENTITY() AS id`
 	
 	var requestId int64
 
-	err := db.DB.QueryRow(query, l.EmployeeId, l.AbsenceReason, l.StartDate, l.EndDate, l.Comment).Scan(&requestId)
+	if l.Status == "" { 
+		l.Status = "New"
+	}
+
+	err := db.DB.QueryRow(query, l.EmployeeId, l.AbsenceReason, l.StartDate, l.EndDate, l.Comment, l.Status).Scan(&requestId)
 	if err != nil { 
 		return err
 	}
@@ -78,10 +82,10 @@ func (l *LeaveRequest) ManageRequest() (int64, error) {
 
 }
 
-func GetLeaveRequests(search, filter string) (*[]LeaveRequest, error) { 
-	query := `SELECT lr.*, f.* FROM leave_requests lr LEFT JOIN employee f ON lr.employee = f.id WHERE lr.id LIKE '%' + @p1 + '%' AND lr.status LIKE '%' + @p2 + '%'`
+func GetLeaveRequests(search, filter, employeeId string) (*[]LeaveRequest, error) { 
+	query := `SELECT lr.*, f.* FROM leave_requests lr LEFT JOIN employee f ON lr.employee = f.id WHERE lr.id LIKE '%' + @p1 + '%' AND lr.status LIKE '%' + @p2 + '%' AND f.id LIKE '%' + @p3 + '%'`
 
-	rows, err := db.DB.Query(query, search, filter)
+	rows, err := db.DB.Query(query, search, filter, employeeId)
 
 	if err != nil {
 		return nil, err
@@ -127,4 +131,36 @@ func GetLeaveRequests(search, filter string) (*[]LeaveRequest, error) {
 	}
 
 	return &requests, nil
+}
+
+
+func (r *LeaveRequest) Update() error {
+	query := `UPDATE leave_requests SET absence_reason = @p1, start_date = @p2, end_date = @p3, status = @p4 WHERE id = @p5`
+
+	stmt, err := db.DB.Prepare(query)
+
+	if err != nil { 
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(r.AbsenceReason, r.StartDate, r.EndDate, r.Status, r.ID)
+
+	if err != nil { 
+		return err
+	}
+
+
+	query = `UPDATE approval_requests SET status = @p1 WHERE leave_request = @p2`
+
+	stmt, err = db.DB.Prepare(query)
+
+	if err != nil { 
+		return err
+	}
+
+	_, err = stmt.Exec(r.Status, r.ID)
+
+	return err
 }

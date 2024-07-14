@@ -1,33 +1,13 @@
-'use client';
-import { navbarLinks } from '@/constants';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import React from 'react';
+import NavLinks from './NavLinks';
+import { getTokenValues } from '@/actions/auth.actions';
 
-const Navbar = () => {
-  const pathname = usePathname();
+const Navbar = async () => {
+  const data = await getTokenValues();
   return (
     <div className='flex items-center justify-between w-full py-2 border-b'>
       <p></p>
-      <div className='flex items-center gap-4'>
-        {navbarLinks.map((link) => {
-          const Icon = link.icon;
-          return (
-            <Link
-              href={link.path}
-              key={link.id}
-              className={`${
-                pathname.startsWith(link.path)
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/20 duration-100 ease-linear'
-              } px-4 py-2 rounded-lg flex items-center gap-2`}
-            >
-              <Icon />
-              <p>{link.name}</p>
-            </Link>
-          );
-        })}
-      </div>
+      <NavLinks role={data.role} />
       <p></p>
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
-import { DialogProps } from '@/types';
-import React, { useState } from 'react';
+import { DialogProps, TProject } from '@/types';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent } from '../ui/dialog';
 import { toast, useToast } from '../ui/use-toast';
 import { Label } from '../ui/label';
@@ -20,9 +20,13 @@ import {
 } from '../ui/select';
 import { Textarea } from '../ui/textarea';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createProject } from '@/actions/project.actions';
+import { createProject, updateProject } from '@/actions/project.actions';
 
-const CreateProjectDialog = ({ open, setOpen }: DialogProps) => {
+interface Props extends DialogProps {
+  project: TProject;
+}
+
+const UpdateProjectDialog = ({ open, setOpen, project }: Props) => {
   //   ProjectType
   // StartDate
   // EndDate
@@ -33,10 +37,19 @@ const CreateProjectDialog = ({ open, setOpen }: DialogProps) => {
   const [endDate, setEndDate] = useState<Date>();
   const [comment, setComment] = useState<string | undefined>();
   const [status, setStatus] = useState<string>('');
+
+  useEffect(() => {
+    if (!project) return;
+    setProjectType(project.project_type);
+    setStartDate(new Date(project.start_date));
+    setEndDate(new Date(project.end_date));
+    setComment(project.comment);
+    setStatus(project.status);
+  }, [project]);
   const queryClient = useQueryClient();
-  const { mutate: create, isPending } = useMutation({
-    mutationKey: ['createProject'],
-    mutationFn: createProject,
+  const { mutate: update, isPending } = useMutation({
+    mutationKey: ['updateProject'],
+    mutationFn: updateProject,
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['getProjects'],
@@ -44,15 +57,15 @@ const CreateProjectDialog = ({ open, setOpen }: DialogProps) => {
       });
       setOpen(false);
       toast({
-        title: 'Project created successfully',
-        description: 'The project has been created successfully',
+        title: 'Project updated successfully',
+        description: 'The project has been updated successfully',
         duration: 1500,
       });
     },
     onError: () => {
       toast({
-        title: 'Error creating project',
-        description: 'There was an error creating the project',
+        title: 'Error updating project',
+        description: 'There was an error updating the project',
         duration: 1500,
         variant: 'destructive',
       });
@@ -71,7 +84,10 @@ const CreateProjectDialog = ({ open, setOpen }: DialogProps) => {
         <p className='text-xl font-semibold'>Create Project</p>
         <div className='flex flex-col gap-0.5 w-full'>
           <Label>Project Type</Label>
-          <Input onChange={(e) => setProjectType(e.target.value)} />
+          <Input
+            defaultValue={projectType}
+            onChange={(e) => setProjectType(e.target.value)}
+          />
         </div>
         <div className='flex w-full items-center gap-2'>
           <div className='flex flex-col gap-0.5 w-full'>
@@ -131,7 +147,7 @@ const CreateProjectDialog = ({ open, setOpen }: DialogProps) => {
         </div>
         <div className='flex flex-col gap-0.5 w-full'>
           <Label>Status</Label>
-          <Select onValueChange={(e) => setStatus(e)}>
+          <Select defaultValue={status} onValueChange={(e) => setStatus(e)}>
             <SelectTrigger>
               <SelectValue placeholder='Select Project Status' />
             </SelectTrigger>
@@ -144,6 +160,7 @@ const CreateProjectDialog = ({ open, setOpen }: DialogProps) => {
         <div className='flex flex-col gap-0.5 w-full'>
           <Label>Comment (optional)</Label>
           <Textarea
+            defaultValue={comment}
             rows={6}
             className='resize-none'
             onChange={(e) => setComment(e.target.value)}
@@ -153,22 +170,23 @@ const CreateProjectDialog = ({ open, setOpen }: DialogProps) => {
           className='w-full'
           disabled={isPending}
           onClick={() => {
-            create({
+            update({
               comment,
               endDate: endDate!,
               startDate: startDate!,
               projectType,
               status,
+              id: project.id,
             });
           }}
         >
           {isPending ? (
             <div className='flex items-center gap-1'>
               <Loader2 className='h-4 w-4 animate-spin' />
-              <p>Create</p>
+              <p>Update</p>
             </div>
           ) : (
-            'Create'
+            'Update'
           )}
         </Button>
       </DialogContent>
@@ -176,4 +194,4 @@ const CreateProjectDialog = ({ open, setOpen }: DialogProps) => {
   );
 };
 
-export default CreateProjectDialog;
+export default UpdateProjectDialog;

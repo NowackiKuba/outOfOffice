@@ -40,6 +40,7 @@ import { toast } from '../ui/use-toast';
 import ManageEmployeeDialog from '../dialogs/ManageEmployeeDialog';
 import FilterSelector from '../FilterSelector';
 import { formUrlQuery, removeKeysFromQuery } from '@/lib/utils';
+import AssignEmployeeToProjectDialog from '../dialogs/AssignEmployeeToProjectDialog';
 
 const Employees = ({ role }: { role: string }) => {
   const searchParams = useSearchParams();
@@ -48,6 +49,8 @@ const Employees = ({ role }: { role: string }) => {
   });
 
   const [isOpenUpdate, setIsOpenUpdate] = useState<boolean>(false);
+
+  const [isOpenAssign, setIsOpenAssign] = useState<boolean>(false);
   const [type, setType] = useState<'update' | 'create'>();
   const [selectedEmployee, setSelectedEmployee] = useState<TEmployee>();
   const queryClient = useQueryClient();
@@ -108,17 +111,19 @@ const Employees = ({ role }: { role: string }) => {
       <div className='flex flex-col gap-4 w-full'>
         <div className='flex items-center justify-between w-full'>
           <p className='text-3xl font-semibold'>Employees</p>
-          <Button
-            onClick={() => {
-              setIsOpenUpdate(true);
-              setType('create');
-            }}
-            variant={'secondary'}
-            className='flex items-center gap-2'
-          >
-            <UserPlus />
-            <p>Create Employee Account</p>
-          </Button>
+          {(role === 'admin' || role === 'hr') && (
+            <Button
+              onClick={() => {
+                setIsOpenUpdate(true);
+                setType('create');
+              }}
+              variant={'secondary'}
+              className='flex items-center gap-2'
+            >
+              <UserPlus />
+              <p>Create Employee Account</p>
+            </Button>
+          )}
         </div>
         <div className='flex items-center gap-2 w-full'>
           <Searchbar
@@ -280,7 +285,13 @@ const Employees = ({ role }: { role: string }) => {
                           </DropdownMenuItem>
                         )}
                         {(role === 'admin' || role === 'pm') && (
-                          <DropdownMenuItem className='flex items-center gap-2 cursor-pointer'>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedEmployee(e);
+                              setIsOpenAssign(true);
+                            }}
+                            className='flex items-center gap-2 cursor-pointer'
+                          >
                             <File className='h-4 w-4' />
                             <p>Assign to project</p>
                           </DropdownMenuItem>
@@ -301,6 +312,13 @@ const Employees = ({ role }: { role: string }) => {
         managers={employees?.filter((e) => e.role === 'hr') || []}
         type={type!}
       />
+      {selectedEmployee && (
+        <AssignEmployeeToProjectDialog
+          employee={selectedEmployee!}
+          open={isOpenAssign}
+          setOpen={setIsOpenAssign}
+        />
+      )}
     </div>
   );
 };

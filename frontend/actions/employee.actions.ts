@@ -1,6 +1,6 @@
 'use server';
 
-import { TEmployee } from '@/types';
+import { TEmployee, TEmployeeProject } from '@/types';
 import axios from 'axios';
 import { RedirectStatusCode } from 'next/dist/client/components/redirect-status-code';
 
@@ -85,4 +85,16 @@ export const updateEmployee = async ({
   });
 
   return res.data.message;
+};
+
+export const getEmployeeProjects = async ({
+  id,
+}: {
+  id: number;
+}): Promise<TEmployeeProject[]> => {
+  const res = await axios(`http://localhost:8080/employee/${id}/projects`, {
+    method: 'GET',
+  });
+
+  return res.data.projects;
 };
