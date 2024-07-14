@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import {
   Edit3,
   Eye,
+  File,
   Loader2,
   Settings,
   ShieldCheck,
@@ -103,7 +104,7 @@ const Projects = ({ role }: { role: string }) => {
             route='/projects'
             placeholder='Search for projects'
             iconPosition='left'
-            otherClasses='xl:max-w-[440px] rounded-md'
+            otherClasses='xl:max-w-[440px] w-full rounded-md'
           />
           <FilterSelector
             queryKey='status'
@@ -112,11 +113,11 @@ const Projects = ({ role }: { role: string }) => {
               { value: 'inactive', label: 'Inactive' },
             ]}
             placeholder='Filter by status'
-            otherClassess='xl:max-w-[220px] py-4'
+            otherClassess='xl:max-w-[220px] max-w-[180px] py-[21px]'
           />
         </div>
       </div>
-      <div className='w-full'>
+      <div className='w-full md:flex hidden'>
         <Table>
           <TableHeader className='bg-muted/50'>
             <TableRow>
@@ -232,6 +233,105 @@ const Projects = ({ role }: { role: string }) => {
             ))}
           </TableBody>
         </Table>
+      </div>
+      <div className='w-full flex items-center gap-2 flex-wrap md:hidden'>
+        {projects?.map((p) => (
+          <div
+            key={p.id}
+            className='bg-secondary rounded-xl sm:w-[calc(50vw-8px)] w-full p-2 flex items-center justify-between'
+          >
+            <div className='flex items-center gap-2 w-full'>
+              <div className='flex items-center justify-center bg-primary/10 text-primary dark:bg-primary/20 dark:text-white text-2xl font-semibold h-16 w-16 rounded-md'>
+                <File className='h-8 w-8' />
+              </div>
+              <div className='flex flex-col'>
+                <div className='flex items-center gap-2.5 w-full'>
+                  <p className='text-lg font-semibold'>{p.project_type}</p>
+                  <div
+                    className={`${
+                      p.status.toLowerCase() === 'active'
+                        ? 'bg-green-500/10 text-green-500 dark:bg-green-500/20 dark:text-green-200'
+                        : 'bg-red-500/10 text-red-500 dark:bg-red-500/20 dark:text-red-200'
+                    } px-2 py-1 rounded-full text-xs font-[500]`}
+                  >
+                    {p.status}
+                  </div>
+                </div>
+                <p className='text-sm'>by {p.pm.full_name}</p>
+              </div>
+            </div>
+            <div className='flex justify-end'>
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <Button size={'icon'} variant={'ghost'}>
+                    <Settings />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {(role === 'admin' || role === 'pm') && (
+                    <DropdownMenuItem
+                      className='flex gap-2 items-center cursor-pointer'
+                      onClick={() => {
+                        setSelectedProject(p);
+                        setIsOpenDetails(true);
+                      }}
+                    >
+                      <Eye className='h-4 w-4' />
+                      <p>See Details</p>
+                    </DropdownMenuItem>
+                  )}
+                  {(role === 'admin' || role === 'pm') && (
+                    <DropdownMenuItem
+                      className='flex gap-2 items-center cursor-pointer'
+                      onClick={() => {
+                        setSelectedProject(p);
+                        setIsOpenUpdate(true);
+                      }}
+                    >
+                      <Edit3 className='h-4 w-4' />
+                      <p>Update</p>
+                    </DropdownMenuItem>
+                  )}
+                  {(role === 'admin' || role === 'pm') && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        manageStatus({
+                          endDate: p.end_date,
+                          id: p.id,
+                          projectType: p.project_type,
+                          startDate: p.start_date,
+                          status: p.status === 'active' ? 'inactive' : 'active',
+                          comment: p.comment,
+                        });
+                      }}
+                      className='flex text-sm items-center gap-2 cursor-pointer'
+                    >
+                      {p.status === 'active' ? (
+                        <>
+                          {isPending ? (
+                            <Loader2 className='h-4 w-4 animate-spin' />
+                          ) : (
+                            <ShieldX className='h-4 w-4' />
+                          )}
+                          <p>Deactivate</p>
+                        </>
+                      ) : (
+                        <>
+                          {isPending ? (
+                            <Loader2 className='h-4 w-4 animate-spin' />
+                          ) : (
+                            <ShieldCheck className='h-4 w-4' />
+                          )}
+                          <p>Activate</p>
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        ))}
       </div>
       <CreateProjectDialog open={isOpenCreate} setOpen={setIsOpenCreate} />
       {selectedProject && (

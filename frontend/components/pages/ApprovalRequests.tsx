@@ -18,9 +18,14 @@ import {
 import Searchbar from '../Searchbar';
 import { TLeaveRequest } from '@/types';
 import RequestDetails from '../dialogs/RequestDetails';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ArrowDown, ArrowUp } from 'lucide-react';
+import { handleSort } from '@/lib/utils';
+import ClearFilters from '../ClearFilters';
 
 const ApprovalRequests = ({ role }: { role: string }) => {
+  const router = useRouter();
+  const [activeSort, setActiveSort] = useState<string>('');
   const searchParams = useSearchParams();
   const { data: approvalRequests, isLoading } = useQuery({
     queryKey: [
@@ -34,7 +39,14 @@ const ApprovalRequests = ({ role }: { role: string }) => {
         filter: searchParams.get('status') ? searchParams?.get('status')! : '',
       }),
   });
+  const keysToDelete = [];
+  if (searchParams?.get('sort')) {
+    keysToDelete.push('sort');
+  }
 
+  if (searchParams?.get('status')) {
+    keysToDelete.push('status');
+  }
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [selectedRequest, setSelectedRequest] = useState<TLeaveRequest>();
   return (
@@ -54,17 +66,53 @@ const ApprovalRequests = ({ role }: { role: string }) => {
               { value: 'New', label: 'New' },
               { value: 'Approved', label: 'Approved' },
               { value: 'Rejected', label: 'Rejected' },
+              { value: 'Cancelled', label: 'Cancelled' },
             ]}
             placeholder='Filter by status'
             otherClassess='xl:max-w-[220px] py-4'
           />
+
+          {(searchParams?.get('sort') || searchParams?.get('status')) && (
+            <ClearFilters
+              keysToDelete={keysToDelete}
+              searchParams={searchParams}
+            />
+          )}
         </div>
       </div>
       <div className='w-full'>
         <Table>
           <TableHeader className='bg-muted/50'>
             <TableRow>
-              <TableHead className='w-[100px]'>ID</TableHead>
+              <TableHead className='w-[100px]'>
+                <div
+                  onClick={() => {
+                    handleSort(
+                      !searchParams?.get('sort')
+                        ? 'asc'
+                        : searchParams?.get('sort') === 'asc'
+                        ? 'desc'
+                        : 'asc',
+                      activeSort,
+                      setActiveSort,
+                      router,
+                      searchParams
+                    );
+                  }}
+                  className='flex items-center justify-between'
+                >
+                  <p>ID</p>
+                  {searchParams?.get('sort') && (
+                    <>
+                      {searchParams?.get('sort') === 'asc' ? (
+                        <ArrowUp className='h-4 w-4' />
+                      ) : (
+                        <ArrowDown className='h-4 w-4' />
+                      )}
+                    </>
+                  )}
+                </div>
+              </TableHead>
               <TableHead>From</TableHead>
               <TableHead>Approver</TableHead>
               <TableHead>Status</TableHead>
@@ -80,9 +128,9 @@ const ApprovalRequests = ({ role }: { role: string }) => {
                 key={r.id}
                 className='cursor-pointer'
               >
-                <TableCell>{r.id}</TableCell>
-                <TableCell>{r.leave_request.from.full_name}</TableCell>
-                <TableCell>{r.approver.full_name}</TableCell>
+                <TableCell>{r?.id}</TableCell>
+                <TableCell>{r?.leave_request?.from?.full_name}</TableCell>
+                <TableCell>{r?.approver?.full_name}</TableCell>
                 <TableCell>
                   <div
                     className={`${

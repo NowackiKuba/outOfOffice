@@ -10,4 +10,5 @@ func EmployeeRoutes(server *gin.Engine) {
 	server.GET("/employees", controllers.GetCompanyEmployees())
 	server.GET("/employee/:id/projects", controllers.GetEmployeeProjects())
 	server.PATCH("/employees/:id", controllers.UpdateEmployee())
+	server.GET("/employee/:id", controllers.GetEmployee())
 }

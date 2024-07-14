@@ -41,26 +41,28 @@ import ManageEmployeeDialog from '../dialogs/ManageEmployeeDialog';
 import FilterSelector from '../FilterSelector';
 import { formUrlQuery, removeKeysFromQuery } from '@/lib/utils';
 import AssignEmployeeToProjectDialog from '../dialogs/AssignEmployeeToProjectDialog';
+import EmployeeDetailsDialog from '../dialogs/EmployeeDetailsDialog';
 
 const Employees = ({ role }: { role: string }) => {
   const searchParams = useSearchParams();
   const { employees, isLoading } = useEmployees({
     search: searchParams?.get('q') ? searchParams?.get('q')! : '',
+    sort: searchParams?.get('sort') ? searchParams?.get('sort')! : '',
   });
 
   const [isOpenUpdate, setIsOpenUpdate] = useState<boolean>(false);
-
+  const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [isOpenAssign, setIsOpenAssign] = useState<boolean>(false);
   const [type, setType] = useState<'update' | 'create'>();
   const [selectedEmployee, setSelectedEmployee] = useState<TEmployee>();
   const queryClient = useQueryClient();
   const router = useRouter();
   const [activeSort, setActiveSort] = useState<string>('');
-  const handleSort = (item: string, activeDir: string) => {
+  const handleSort = (item: string) => {
     if (activeSort === item) {
       setActiveSort('');
       const newUrl = removeKeysFromQuery({
-        keysToRemove: ['sort', 'dir'],
+        keysToRemove: ['sort'],
         params: searchParams.toString(),
       });
 
@@ -70,12 +72,6 @@ const Employees = ({ role }: { role: string }) => {
       const newUrl = formUrlQuery({
         key: 'sort',
         value: item,
-        params: searchParams.toString(),
-      });
-
-      const newUrl2 = formUrlQuery({
-        key: 'dir',
-        value: activeDir,
         params: searchParams.toString(),
       });
 
@@ -130,7 +126,7 @@ const Employees = ({ role }: { role: string }) => {
             route='/employees'
             placeholder='Search for employees'
             iconPosition='left'
-            otherClasses='xl:max-w-[440px] rounded-md'
+            otherClasses='xl:max-w-[440px] w-full rounded-md'
           />
           <FilterSelector
             queryKey='role'
@@ -141,11 +137,11 @@ const Employees = ({ role }: { role: string }) => {
               { value: 'hr', label: 'HR Manager' },
             ]}
             placeholder='Filter by role'
-            otherClassess='xl:max-w-[220px] py-4'
+            otherClassess='xl:max-w-[220px] max-w-[180px] md:max-w-[200px] py-4'
           />
         </div>
       </div>
-      <div className='w-full'>
+      <div className='md:flex hidden w-full'>
         <Table>
           <TableHeader className='bg-muted/50'>
             <TableRow>
@@ -171,10 +167,9 @@ const Employees = ({ role }: { role: string }) => {
                 <div
                   onClick={() => {
                     handleSort(
-                      'balance',
-                      searchParams?.get('dir')
+                      !searchParams?.get('sort')
                         ? 'asc'
-                        : searchParams?.get('dir') === 'asc'
+                        : searchParams?.get('sort') === 'asc'
                         ? 'desc'
                         : 'asc'
                     );
@@ -182,14 +177,10 @@ const Employees = ({ role }: { role: string }) => {
                   className='flex items-center justify-between cursor-pointer'
                 >
                   Balance
-                  {searchParams?.get('order_by') === 'balance' && (
-                    <>
-                      {searchParams?.get('dir') === 'asc' ? (
-                        <ArrowUp />
-                      ) : (
-                        <ArrowDown />
-                      )}
-                    </>
+                  {searchParams?.get('sort') === 'asc' ? (
+                    <ArrowUp className='h-3 w-3' />
+                  ) : (
+                    <ArrowDown className='h-3 w-3' />
                   )}
                 </div>
               </TableHead>
@@ -279,7 +270,13 @@ const Employees = ({ role }: { role: string }) => {
                           </DropdownMenuItem>
                         )}
                         {(role === 'admin' || role === 'pm') && (
-                          <DropdownMenuItem className='flex items-center gap-2 cursor-pointer'>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedEmployee(e);
+                              setIsOpenDetails(true);
+                            }}
+                            className='flex items-center gap-2 cursor-pointer'
+                          >
                             <Eye className='h-4 w-4' />
                             <p>See Details</p>
                           </DropdownMenuItem>
@@ -305,6 +302,109 @@ const Employees = ({ role }: { role: string }) => {
           </TableBody>
         </Table>
       </div>
+      <div className='flex items-center flex-wrap w-full gap-1 md:hidden sm:gap-2'>
+        {employees?.map((e) => (
+          <div
+            key={e.id}
+            className='sm:w-[calc(50%-8px)] w-full bg-secondary rounded-xl px-2 py-3 flex items-center justify-between'
+          >
+            <div className='flex items-center gap-2'>
+              <div className='h-16 w-16 rounded-md bg-primary/10 flex items-center justify-center text-primary dark:bg-primary/20 dark:text-blue-200 text-xl font-semibold'>
+                {e.full_name[0]}
+                {e.full_name.split(' ')[1][0]}
+              </div>
+              <div className='flex flex-col'>
+                <p className='text-lg font-semibold'>{e.full_name}</p>
+                <p>{e.email}</p>
+              </div>
+            </div>
+            <div className='flex '>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size={'icon'} variant={'ghost'}>
+                    <Settings />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {(role === 'admin' || role === 'hr') && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedEmployee(e);
+                        setIsOpenUpdate(true);
+                        setType('update');
+                      }}
+                      className='flex text-sm items-center gap-2 cursor-pointer'
+                    >
+                      <Edit3 className='h-4 w-4' />
+                      <p>Update</p>
+                    </DropdownMenuItem>
+                  )}
+                  {(role === 'admin' || role === 'hr') && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        deactivate({
+                          email: e.email,
+                          status: e.status === 'active' ? 'inactive' : 'active',
+                          fullName: e.full_name,
+                          id: e.id,
+                          partner: e.partner,
+                          position: e.position,
+                          subDivision: e.sub_division,
+                        });
+                      }}
+                      className='flex text-sm items-center gap-2 cursor-pointer'
+                    >
+                      {e.status === 'active' ? (
+                        <>
+                          {isPending ? (
+                            <Loader2 className='h-4 w-4 animate-spin' />
+                          ) : (
+                            <ShieldX className='h-4 w-4' />
+                          )}
+                          <p>Deactivate</p>
+                        </>
+                      ) : (
+                        <>
+                          {isPending ? (
+                            <Loader2 className='h-4 w-4 animate-spin' />
+                          ) : (
+                            <ShieldCheck className='h-4 w-4' />
+                          )}
+                          <p>Activate</p>
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                  )}
+                  {(role === 'admin' || role === 'pm') && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedEmployee(e);
+                        setIsOpenDetails(true);
+                      }}
+                      className='flex items-center gap-2 cursor-pointer'
+                    >
+                      <Eye className='h-4 w-4' />
+                      <p>See Details</p>
+                    </DropdownMenuItem>
+                  )}
+                  {(role === 'admin' || role === 'pm') && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedEmployee(e);
+                        setIsOpenAssign(true);
+                      }}
+                      className='flex items-center gap-2 cursor-pointer'
+                    >
+                      <File className='h-4 w-4' />
+                      <p>Assign to project</p>
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        ))}
+      </div>
       <ManageEmployeeDialog
         open={isOpenUpdate}
         setOpen={setIsOpenUpdate}
@@ -317,6 +417,13 @@ const Employees = ({ role }: { role: string }) => {
           employee={selectedEmployee!}
           open={isOpenAssign}
           setOpen={setIsOpenAssign}
+        />
+      )}
+      {selectedEmployee && (
+        <EmployeeDetailsDialog
+          employee={selectedEmployee}
+          open={isOpenDetails}
+          setOpen={setIsOpenDetails}
         />
       )}
     </div>

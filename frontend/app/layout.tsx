@@ -3,6 +3,7 @@ import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import QueryProvider from '@/providers/query-provider';
+import { ThemeProvider } from '@/providers/theme-provider';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -23,7 +24,14 @@ export default function RootLayout({
     <html lang='en'>
       <body className={poppins.className}>
         <QueryProvider>
-          {children}
+          <ThemeProvider
+            attribute='class'
+            defaultTheme='system'
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
           <Toaster />
         </QueryProvider>
       </body>

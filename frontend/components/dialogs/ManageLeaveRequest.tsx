@@ -13,12 +13,14 @@ import { Calendar } from '../ui/calendar';
 import { Textarea } from '../ui/textarea';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateRequest } from '@/actions/leaveRequest.actions';
+import { Drawer, DrawerContent } from '../ui/drawer';
 
 interface Props extends DialogProps {
   request: TLeaveRequest;
 }
 
 const ManageLeaveRequest = ({ open, setOpen, request }: Props) => {
+  const isMobile = window.innerWidth < 768;
   const [reason, setReason] = useState<string>('');
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
@@ -59,169 +61,345 @@ const ManageLeaveRequest = ({ open, setOpen, request }: Props) => {
     setEndDate(new Date(request.end_date));
   }, [request]);
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) {
-          setOpen(v);
-        }
-      }}
-    >
-      <DialogContent className='flex flex-col gap-4 w-full'>
-        <p className='text-xl font-semibold'>Manage Request</p>
-        <div className='flex flex-col gap-1 w-full'>
-          <Label>Absence Reason</Label>
-          <Textarea
-            rows={8}
-            className='resize-none'
-            onChange={(e) => setReason(e.target.value)}
-            defaultValue={reason}
-            disabled={
-              isPending ||
-              request.status.toLowerCase() !== 'new' ||
-              request.status.toLowerCase() !== 'submitted'
+    <>
+      {isMobile ? (
+        <Drawer
+          open={open}
+          onOpenChange={(v) => {
+            if (!v) {
+              setOpen(v);
             }
-          />
-        </div>
-        <div className='flex w-full items-center gap-2'>
-          <div className='flex flex-col gap-0.5 w-full'>
-            <Label>Start Date</Label>
-            <Popover>
-              <PopoverTrigger
-                asChild
+          }}
+        >
+          <DrawerContent className='flex flex-col gap-4 w-full px-2 pb-2'>
+            <p className='text-xl font-semibold'>Manage Request</p>
+            <div className='flex flex-col gap-1 w-full'>
+              <Label>Absence Reason</Label>
+              <Textarea
+                rows={8}
+                className='resize-none'
+                onChange={(e) => setReason(e.target.value)}
+                defaultValue={reason}
+                disabled={
+                  isPending ||
+                  request.status.toLowerCase() !== 'new' ||
+                  request.status.toLowerCase() !== 'submitted'
+                }
+              />
+            </div>
+            <div className='flex w-full items-center gap-2'>
+              <div className='flex flex-col gap-0.5 w-full'>
+                <Label>Start Date</Label>
+                <Popover>
+                  <PopoverTrigger
+                    asChild
+                    disabled={
+                      isPending ||
+                      request.status.toLowerCase() !== 'new' ||
+                      request.status.toLowerCase() !== 'submitted'
+                    }
+                  >
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !startDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className='mr-2 h-4 w-4' />
+                      {startDate ? (
+                        format(startDate, 'PPP')
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0'>
+                    <Calendar
+                      mode='single'
+                      selected={startDate}
+                      onSelect={setStartDate}
+                      initialFocus
+                      disabled={
+                        isPending ||
+                        request.status.toLowerCase() !== 'new' ||
+                        request.status.toLowerCase() !== 'submitted'
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className='flex flex-col gap-0.5 w-full'>
+                <Label>End Date</Label>
+                <Popover>
+                  <PopoverTrigger
+                    asChild
+                    disabled={
+                      isPending ||
+                      request.status.toLowerCase() !== 'new' ||
+                      request.status.toLowerCase() !== 'submitted'
+                    }
+                  >
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !endDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className='mr-2 h-4 w-4' />
+                      {endDate ? (
+                        format(endDate, 'PPP')
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0'>
+                    <Calendar
+                      mode='single'
+                      selected={endDate}
+                      onSelect={setEndDate}
+                      initialFocus
+                      disabled={
+                        isPending ||
+                        request.status.toLowerCase() !== 'new' ||
+                        request.status.toLowerCase() !== 'submitted'
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <div className='flex items-center gap-2'>
+              <Button
+                variant={'destructive'}
+                className='w-full'
+                onClick={() => {
+                  setUpdateType('cancel');
+                  manage({
+                    endDate: endDate!,
+                    id: request.id,
+                    reason: reason,
+                    startDate: startDate!,
+                    status: 'Cancelled',
+                  });
+                }}
                 disabled={
                   isPending ||
                   request.status.toLowerCase() !== 'new' ||
                   request.status.toLowerCase() !== 'submitted'
                 }
               >
-                <Button
-                  variant={'outline'}
-                  className={cn(
-                    'w-full justify-start text-left font-normal',
-                    !startDate && 'text-muted-foreground'
-                  )}
-                >
-                  <CalendarIcon className='mr-2 h-4 w-4' />
-                  {startDate ? (
-                    format(startDate, 'PPP')
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className='w-auto p-0'>
-                <Calendar
-                  mode='single'
-                  selected={startDate}
-                  onSelect={setStartDate}
-                  initialFocus
-                  disabled={
-                    isPending ||
-                    request.status.toLowerCase() !== 'new' ||
-                    request.status.toLowerCase() !== 'submitted'
-                  }
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div className='flex flex-col gap-0.5 w-full'>
-            <Label>End Date</Label>
-            <Popover>
-              <PopoverTrigger
-                asChild
+                {updateType === 'cancel' ? (
+                  <div className='flex items-center gap-1'>
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                    <p>Cancel Request</p>
+                  </div>
+                ) : (
+                  'Cancel Request'
+                )}
+              </Button>
+              <Button
+                className='w-full'
+                onClick={() => {
+                  setUpdateType('update');
+                  manage({
+                    endDate: endDate!,
+                    id: request.id,
+                    reason: reason,
+                    startDate: startDate!,
+                    status: request.status,
+                  });
+                }}
                 disabled={
                   isPending ||
                   request.status.toLowerCase() !== 'new' ||
                   request.status.toLowerCase() !== 'submitted'
                 }
               >
-                <Button
-                  variant={'outline'}
-                  className={cn(
-                    'w-full justify-start text-left font-normal',
-                    !endDate && 'text-muted-foreground'
-                  )}
-                >
-                  <CalendarIcon className='mr-2 h-4 w-4' />
-                  {endDate ? format(endDate, 'PPP') : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className='w-auto p-0'>
-                <Calendar
-                  mode='single'
-                  selected={endDate}
-                  onSelect={setEndDate}
-                  initialFocus
-                  disabled={
-                    isPending ||
-                    request.status.toLowerCase() !== 'new' ||
-                    request.status.toLowerCase() !== 'submitted'
-                  }
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-        <div className='flex items-center gap-2'>
-          <Button
-            variant={'destructive'}
-            className='w-full'
-            onClick={() => {
-              setUpdateType('cancel');
-              manage({
-                endDate: endDate!,
-                id: request.id,
-                reason: reason,
-                startDate: startDate!,
-                status: 'Cancelled',
-              });
-            }}
-            disabled={
-              isPending ||
-              request.status.toLowerCase() !== 'new' ||
-              request.status.toLowerCase() !== 'submitted'
+                {updateType === 'update' ? (
+                  <div className='flex items-center gap-1'>
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                    <p>Update Request</p>
+                  </div>
+                ) : (
+                  'Update Request'
+                )}
+              </Button>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog
+          open={open}
+          onOpenChange={(v) => {
+            if (!v) {
+              setOpen(v);
             }
-          >
-            {updateType === 'cancel' ? (
-              <div className='flex items-center gap-1'>
-                <Loader2 className='h-4 w-4 animate-spin' />
-                <p>Cancel Request</p>
+          }}
+        >
+          <DialogContent className='flex flex-col gap-4 w-full'>
+            <p className='text-xl font-semibold'>Manage Request</p>
+            <div className='flex flex-col gap-1 w-full'>
+              <Label>Absence Reason</Label>
+              <Textarea
+                rows={8}
+                className='resize-none'
+                onChange={(e) => setReason(e.target.value)}
+                defaultValue={reason}
+                disabled={
+                  isPending ||
+                  request.status.toLowerCase() !== 'new' ||
+                  request.status.toLowerCase() !== 'submitted'
+                }
+              />
+            </div>
+            <div className='flex w-full items-center gap-2'>
+              <div className='flex flex-col gap-0.5 w-full'>
+                <Label>Start Date</Label>
+                <Popover>
+                  <PopoverTrigger
+                    asChild
+                    disabled={
+                      isPending ||
+                      request.status.toLowerCase() !== 'new' ||
+                      request.status.toLowerCase() !== 'submitted'
+                    }
+                  >
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !startDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className='mr-2 h-4 w-4' />
+                      {startDate ? (
+                        format(startDate, 'PPP')
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0'>
+                    <Calendar
+                      mode='single'
+                      selected={startDate}
+                      onSelect={setStartDate}
+                      initialFocus
+                      disabled={
+                        isPending ||
+                        request.status.toLowerCase() !== 'new' ||
+                        request.status.toLowerCase() !== 'submitted'
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
-            ) : (
-              'Cancel Request'
-            )}
-          </Button>
-          <Button
-            className='w-full'
-            onClick={() => {
-              setUpdateType('update');
-              manage({
-                endDate: endDate!,
-                id: request.id,
-                reason: reason,
-                startDate: startDate!,
-                status: request.status,
-              });
-            }}
-            disabled={
-              isPending ||
-              request.status.toLowerCase() !== 'new' ||
-              request.status.toLowerCase() !== 'submitted'
-            }
-          >
-            {updateType === 'update' ? (
-              <div className='flex items-center gap-1'>
-                <Loader2 className='h-4 w-4 animate-spin' />
-                <p>Update Request</p>
+              <div className='flex flex-col gap-0.5 w-full'>
+                <Label>End Date</Label>
+                <Popover>
+                  <PopoverTrigger
+                    asChild
+                    disabled={
+                      isPending ||
+                      request.status.toLowerCase() !== 'new' ||
+                      request.status.toLowerCase() !== 'submitted'
+                    }
+                  >
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !endDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className='mr-2 h-4 w-4' />
+                      {endDate ? (
+                        format(endDate, 'PPP')
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0'>
+                    <Calendar
+                      mode='single'
+                      selected={endDate}
+                      onSelect={setEndDate}
+                      initialFocus
+                      disabled={
+                        isPending ||
+                        request.status.toLowerCase() !== 'new' ||
+                        request.status.toLowerCase() !== 'submitted'
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
-            ) : (
-              'Update Request'
-            )}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+            </div>
+            <div className='flex items-center gap-2'>
+              <Button
+                variant={'destructive'}
+                className='w-full'
+                onClick={() => {
+                  setUpdateType('cancel');
+                  manage({
+                    endDate: endDate!,
+                    id: request.id,
+                    reason: reason,
+                    startDate: startDate!,
+                    status: 'Cancelled',
+                  });
+                }}
+                disabled={
+                  isPending ||
+                  request.status.toLowerCase() !== 'new' ||
+                  request.status.toLowerCase() !== 'submitted'
+                }
+              >
+                {updateType === 'cancel' ? (
+                  <div className='flex items-center gap-1'>
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                    <p>Cancel Request</p>
+                  </div>
+                ) : (
+                  'Cancel Request'
+                )}
+              </Button>
+              <Button
+                className='w-full'
+                onClick={() => {
+                  setUpdateType('update');
+                  manage({
+                    endDate: endDate!,
+                    id: request.id,
+                    reason: reason,
+                    startDate: startDate!,
+                    status: request.status,
+                  });
+                }}
+                disabled={
+                  isPending ||
+                  request.status.toLowerCase() !== 'new' ||
+                  request.status.toLowerCase() !== 'submitted'
+                }
+              >
+                {updateType === 'update' ? (
+                  <div className='flex items-center gap-1'>
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                    <p>Update Request</p>
+                  </div>
+                ) : (
+                  'Update Request'
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 };
 

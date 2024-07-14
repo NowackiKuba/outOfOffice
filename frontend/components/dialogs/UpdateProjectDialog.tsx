@@ -21,12 +21,14 @@ import {
 import { Textarea } from '../ui/textarea';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createProject, updateProject } from '@/actions/project.actions';
+import { Drawer, DrawerContent } from '../ui/drawer';
 
 interface Props extends DialogProps {
   project: TProject;
 }
 
 const UpdateProjectDialog = ({ open, setOpen, project }: Props) => {
+  const isMobile = window.innerWidth < 768;
   //   ProjectType
   // StartDate
   // EndDate
@@ -72,125 +74,257 @@ const UpdateProjectDialog = ({ open, setOpen, project }: Props) => {
     },
   });
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) {
-          setOpen(v);
-        }
-      }}
-    >
-      <DialogContent className='flex flex-col gap-4 w-full'>
-        <p className='text-xl font-semibold'>Create Project</p>
-        <div className='flex flex-col gap-0.5 w-full'>
-          <Label>Project Type</Label>
-          <Input
-            defaultValue={projectType}
-            onChange={(e) => setProjectType(e.target.value)}
-          />
-        </div>
-        <div className='flex w-full items-center gap-2'>
-          <div className='flex flex-col gap-0.5 w-full'>
-            <Label>Start Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={'outline'}
-                  className={cn(
-                    'w-full justify-start text-left font-normal',
-                    !startDate && 'text-muted-foreground'
-                  )}
-                >
-                  <CalendarIcon className='mr-2 h-4 w-4' />
-                  {startDate ? (
-                    format(startDate, 'PPP')
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className='w-auto p-0'>
-                <Calendar
-                  mode='single'
-                  selected={startDate}
-                  onSelect={setStartDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div className='flex flex-col gap-0.5 w-full'>
-            <Label>End Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={'outline'}
-                  className={cn(
-                    'w-full justify-start text-left font-normal',
-                    !endDate && 'text-muted-foreground'
-                  )}
-                >
-                  <CalendarIcon className='mr-2 h-4 w-4' />
-                  {endDate ? format(endDate, 'PPP') : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className='w-auto p-0'>
-                <Calendar
-                  mode='single'
-                  selected={endDate}
-                  onSelect={setEndDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-        <div className='flex flex-col gap-0.5 w-full'>
-          <Label>Status</Label>
-          <Select defaultValue={status} onValueChange={(e) => setStatus(e)}>
-            <SelectTrigger>
-              <SelectValue placeholder='Select Project Status' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='active'>Active</SelectItem>
-              <SelectItem value='inactive'>Inactive</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className='flex flex-col gap-0.5 w-full'>
-          <Label>Comment (optional)</Label>
-          <Textarea
-            defaultValue={comment}
-            rows={6}
-            className='resize-none'
-            onChange={(e) => setComment(e.target.value)}
-          />
-        </div>
-        <Button
-          className='w-full'
-          disabled={isPending}
-          onClick={() => {
-            update({
-              comment,
-              endDate: endDate!,
-              startDate: startDate!,
-              projectType,
-              status,
-              id: project.id,
-            });
+    <>
+      {isMobile ? (
+        <Drawer
+          open={open}
+          onOpenChange={(v) => {
+            if (!v) {
+              setOpen(v);
+            }
           }}
         >
-          {isPending ? (
-            <div className='flex items-center gap-1'>
-              <Loader2 className='h-4 w-4 animate-spin' />
-              <p>Update</p>
+          <DrawerContent className='flex flex-col gap-4 w-full px-2 pb-2'>
+            <p className='text-xl font-semibold'>Create Project</p>
+            <div className='flex flex-col gap-0.5 w-full'>
+              <Label>Project Type</Label>
+              <Input
+                defaultValue={projectType}
+                onChange={(e) => setProjectType(e.target.value)}
+              />
             </div>
-          ) : (
-            'Update'
-          )}
-        </Button>
-      </DialogContent>
-    </Dialog>
+            <div className='flex w-full items-center gap-2'>
+              <div className='flex flex-col gap-0.5 w-full'>
+                <Label>Start Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !startDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className='mr-2 h-4 w-4' />
+                      {startDate ? (
+                        format(startDate, 'PPP')
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0'>
+                    <Calendar
+                      mode='single'
+                      selected={startDate}
+                      onSelect={setStartDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className='flex flex-col gap-0.5 w-full'>
+                <Label>End Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !endDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className='mr-2 h-4 w-4' />
+                      {endDate ? (
+                        format(endDate, 'PPP')
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0'>
+                    <Calendar
+                      mode='single'
+                      selected={endDate}
+                      onSelect={setEndDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <div className='flex flex-col gap-0.5 w-full'>
+              <Label>Status</Label>
+              <Select defaultValue={status} onValueChange={(e) => setStatus(e)}>
+                <SelectTrigger>
+                  <SelectValue placeholder='Select Project Status' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='active'>Active</SelectItem>
+                  <SelectItem value='inactive'>Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className='flex flex-col gap-0.5 w-full'>
+              <Label>Comment (optional)</Label>
+              <Textarea
+                defaultValue={comment}
+                rows={6}
+                className='resize-none'
+                onChange={(e) => setComment(e.target.value)}
+              />
+            </div>
+            <Button
+              className='w-full'
+              disabled={isPending}
+              onClick={() => {
+                update({
+                  comment,
+                  endDate: endDate!,
+                  startDate: startDate!,
+                  projectType,
+                  status,
+                  id: project.id,
+                });
+              }}
+            >
+              {isPending ? (
+                <div className='flex items-center gap-1'>
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                  <p>Update</p>
+                </div>
+              ) : (
+                'Update'
+              )}
+            </Button>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog
+          open={open}
+          onOpenChange={(v) => {
+            if (!v) {
+              setOpen(v);
+            }
+          }}
+        >
+          <DialogContent className='flex flex-col gap-4 w-full'>
+            <p className='text-xl font-semibold'>Create Project</p>
+            <div className='flex flex-col gap-0.5 w-full'>
+              <Label>Project Type</Label>
+              <Input
+                defaultValue={projectType}
+                onChange={(e) => setProjectType(e.target.value)}
+              />
+            </div>
+            <div className='flex w-full items-center gap-2'>
+              <div className='flex flex-col gap-0.5 w-full'>
+                <Label>Start Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !startDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className='mr-2 h-4 w-4' />
+                      {startDate ? (
+                        format(startDate, 'PPP')
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0'>
+                    <Calendar
+                      mode='single'
+                      selected={startDate}
+                      onSelect={setStartDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className='flex flex-col gap-0.5 w-full'>
+                <Label>End Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !endDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className='mr-2 h-4 w-4' />
+                      {endDate ? (
+                        format(endDate, 'PPP')
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0'>
+                    <Calendar
+                      mode='single'
+                      selected={endDate}
+                      onSelect={setEndDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <div className='flex flex-col gap-0.5 w-full'>
+              <Label>Status</Label>
+              <Select defaultValue={status} onValueChange={(e) => setStatus(e)}>
+                <SelectTrigger>
+                  <SelectValue placeholder='Select Project Status' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='active'>Active</SelectItem>
+                  <SelectItem value='inactive'>Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className='flex flex-col gap-0.5 w-full'>
+              <Label>Comment (optional)</Label>
+              <Textarea
+                defaultValue={comment}
+                rows={6}
+                className='resize-none'
+                onChange={(e) => setComment(e.target.value)}
+              />
+            </div>
+            <Button
+              className='w-full'
+              disabled={isPending}
+              onClick={() => {
+                update({
+                  comment,
+                  endDate: endDate!,
+                  startDate: startDate!,
+                  projectType,
+                  status,
+                  id: project.id,
+                });
+              }}
+            >
+              {isPending ? (
+                <div className='flex items-center gap-1'>
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                  <p>Update</p>
+                </div>
+              ) : (
+                'Update'
+              )}
+            </Button>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 };
 

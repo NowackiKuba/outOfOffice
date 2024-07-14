@@ -66,7 +66,7 @@ const LeaveRequests = ({ role }: { role: string }) => {
             route='/leave-requests'
             placeholder='Search for leave requests'
             iconPosition='left'
-            otherClasses='xl:max-w-[440px] rounded-md'
+            otherClasses='xl:max-w-[440px] w-full rounded-md'
           />
           <FilterSelector
             queryKey='status'
@@ -76,7 +76,7 @@ const LeaveRequests = ({ role }: { role: string }) => {
               { value: 'Rejected', label: 'Rejected' },
             ]}
             placeholder='Filter by status'
-            otherClassess='xl:max-w-[220px] py-4'
+            otherClassess='xl:max-w-[220px] w-[180px] py-[21px]'
           />
           {searchParams?.get('status') && (
             <ClearFilters
@@ -108,9 +108,9 @@ const LeaveRequests = ({ role }: { role: string }) => {
                 className='cursor-pointer'
               >
                 <TableCell>{r.id}</TableCell>
-                <TableCell>{r.from.full_name}</TableCell>
-                <TableCell>{format(r.start_date, 'dd.MM.yyyy')}</TableCell>
-                <TableCell>{format(r.end_date, 'dd.MM.yyyy')}</TableCell>
+                <TableCell>{r?.from?.full_name}</TableCell>
+                <TableCell>{format(r?.start_date, 'dd.MM.yyyy')}</TableCell>
+                <TableCell>{format(r?.end_date, 'dd.MM.yyyy')}</TableCell>
                 <TableCell>
                   <div
                     className={`${

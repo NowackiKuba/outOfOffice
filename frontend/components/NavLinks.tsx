@@ -7,7 +7,7 @@ import React from 'react';
 const NavLinks = ({ role }: { role: string }) => {
   const pathname = usePathname();
   return (
-    <div className='flex items-center gap-4'>
+    <div className='md:flex hidden items-center gap-4'>
       {navbarLinks.map((link) => {
         const Icon = link.icon;
         return (

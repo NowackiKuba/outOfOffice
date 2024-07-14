@@ -3,15 +3,21 @@
 import { TEmployee, TEmployeeProject } from '@/types';
 import axios from 'axios';
 import { RedirectStatusCode } from 'next/dist/client/components/redirect-status-code';
+import { getTokenValues } from './auth.actions';
 
 export const getCompanyEmployees = async ({
   search,
+  sort,
 }: {
   search?: string;
+  sort?: string;
 }): Promise<TEmployee[]> => {
-  const res = await axios(`http://localhost:8080/employees?search=${search}`, {
-    method: 'GET',
-  });
+  const res = await axios(
+    `http://localhost:8080/employees?search=${search}&sort=${sort}`,
+    {
+      method: 'GET',
+    }
+  );
 
   return res.data.employees;
 };
@@ -97,4 +103,24 @@ export const getEmployeeProjects = async ({
   });
 
   return res.data.projects;
+};
+
+export const getEmployee = async ({
+  id,
+}: {
+  id?: number;
+}): Promise<TEmployee> => {
+  let employeeId: number;
+  if (!id) {
+    const { userId } = await getTokenValues();
+    employeeId = userId;
+  } else {
+    employeeId = id;
+  }
+
+  const res = await axios(`http://localhost:8080/employee/${employeeId}`, {
+    method: 'GET',
+  });
+
+  return res.data.employee;
 };

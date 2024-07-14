@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"out-of-office.com/outOfOffice/db"
@@ -46,8 +47,17 @@ func (e *Employee) Create() error {
 }
 
 
-func GetEmployees(search string) (*[]Employee, error) { 
-	query := `SELECT * FROM employee WHERE full_name LIKE @p1`
+func GetEmployees(search, sort string) (*[]Employee, error) { 
+
+	var sortDir string 
+
+	if sort == "asc" { 
+		sortDir = "ASC"
+	} else if sort == "desc" { 
+		sortDir = "DESC"
+	}
+
+	query := fmt.Sprintf(`SELECT * FROM employee WHERE full_name LIKE @p1 ORDER BY balance %s`, sortDir)
 
 	likeParam := "%" + search + "%"
 
