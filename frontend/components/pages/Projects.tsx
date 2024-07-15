@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import {
+  ArrowDown,
+  ArrowUp,
   Edit3,
   Eye,
   File,
@@ -26,7 +28,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { format } from 'date-fns';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { TProject } from '@/types';
 import UpdateProjectDialog from '../dialogs/UpdateProjectDialog';
 import {
@@ -37,6 +39,8 @@ import {
 } from '../ui/dropdown-menu';
 import { toast } from '../ui/use-toast';
 import ProjectDetailsDialog from '../dialogs/ProjectDetailsDialog';
+import { formUrlQueryWithMultipleParams } from '@/lib/utils';
+import ClearFilters from '../ClearFilters';
 
 const Projects = ({ role }: { role: string }) => {
   const searchParams = useSearchParams();
@@ -44,17 +48,23 @@ const Projects = ({ role }: { role: string }) => {
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [isOpenUpdate, setIsOpenUpdate] = useState<boolean>(false);
   const [selectedProject, setSelectedProject] = useState<TProject>();
-
+  const router = useRouter();
   const { data: projects, isLoading } = useQuery({
     queryKey: [
       'getProjects',
       { search: searchParams?.get('q') },
       { filter: searchParams?.get('status') },
+      { sort: searchParams?.get('sort') },
+      { dir: searchParams?.get('dir') },
     ],
     queryFn: async () =>
       await getProjects({
         search: searchParams.get('q') ? searchParams?.get('q')! : '',
         filter: searchParams?.get('status') ? searchParams?.get('status')! : '',
+        sort: searchParams?.get('sort')
+          ? searchParams?.get('sort')!
+          : 'start_date',
+        dir: searchParams?.get('dir') ? searchParams?.get('dir')! : 'asc',
       }),
   });
   const queryClient = useQueryClient();
@@ -81,6 +91,16 @@ const Projects = ({ role }: { role: string }) => {
       });
     },
   });
+
+  const handleSort = (keys: string[], values: string[]) => {
+    const newUrl = formUrlQueryWithMultipleParams({
+      keys: keys,
+      params: searchParams.toString(),
+      values: values,
+    });
+
+    router.push(newUrl, { scroll: false });
+  };
   return (
     <div className='w-full flex flex-col gap-8'>
       <div className='flex flex-col gap-4 w-full'>
@@ -115,6 +135,14 @@ const Projects = ({ role }: { role: string }) => {
             placeholder='Filter by status'
             otherClassess='xl:max-w-[220px] max-w-[180px] py-[21px]'
           />
+          {(searchParams?.get('status') ||
+            searchParams?.get('sort') ||
+            searchParams?.get('dir')) && (
+            <ClearFilters
+              keysToDelete={['status', 'sort', 'dir']}
+              searchParams={searchParams}
+            />
+          )}
         </div>
       </div>
       <div className='w-full md:flex hidden'>
@@ -124,8 +152,64 @@ const Projects = ({ role }: { role: string }) => {
               <TableHead className='w-[100px]'>ID</TableHead>
               <TableHead>Project Type</TableHead>
               <TableHead>Project Manager</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
+              <TableHead>
+                <div
+                  onClick={() => {
+                    handleSort(
+                      ['sort', 'dir'],
+                      [
+                        'start_date',
+                        !searchParams?.get('dir')
+                          ? 'asc'
+                          : searchParams?.get('dir') === 'asc'
+                          ? 'desc'
+                          : 'asc',
+                      ]
+                    );
+                  }}
+                  className='flex items-center justify-between cursor-pointer'
+                >
+                  Start Date
+                  {searchParams?.get('sort') === 'start_date' && (
+                    <>
+                      {searchParams?.get('dir') === 'asc' ? (
+                        <ArrowUp className='h-4 w-4' />
+                      ) : (
+                        <ArrowDown className='h-4 w-4' />
+                      )}
+                    </>
+                  )}
+                </div>
+              </TableHead>
+              <TableHead>
+                <div
+                  onClick={() => {
+                    handleSort(
+                      ['sort', 'dir'],
+                      [
+                        'end_date',
+                        !searchParams?.get('dir')
+                          ? 'asc'
+                          : searchParams?.get('dir') === 'asc'
+                          ? 'desc'
+                          : 'asc',
+                      ]
+                    );
+                  }}
+                  className='flex items-center justify-between cursor-pointer'
+                >
+                  End Date
+                  {searchParams?.get('sort') === 'end_date' && (
+                    <>
+                      {searchParams?.get('dir') === 'asc' ? (
+                        <ArrowUp className='h-4 w-4' />
+                      ) : (
+                        <ArrowDown className='h-4 w-4' />
+                      )}
+                    </>
+                  )}
+                </div>
+              </TableHead>
               <TableHead>Status</TableHead>
               {role.toLowerCase() !== 'employee' && (
                 <TableHead className='text-right'>Options</TableHead>

@@ -27,6 +27,29 @@ export const formUrlQuery = ({ params, key, value }: UrlQueryParams) => {
     { skipNull: true }
   );
 };
+export const formUrlQueryWithMultipleParams = ({
+  params,
+  keys,
+  values,
+}: {
+  params: string;
+  keys: string[];
+  values: string[];
+}) => {
+  const currentUrl = qs.parse(params);
+
+  keys.map((key, index) => {
+    currentUrl[key] = values[index];
+  });
+
+  return qs.stringifyUrl(
+    {
+      url: window?.location?.pathname,
+      query: currentUrl,
+    },
+    { skipNull: true }
+  );
+};
 
 interface RemoveUrlQueryParams {
   params: string;

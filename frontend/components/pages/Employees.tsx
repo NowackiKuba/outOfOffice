@@ -42,6 +42,7 @@ import FilterSelector from '../FilterSelector';
 import { formUrlQuery, removeKeysFromQuery } from '@/lib/utils';
 import AssignEmployeeToProjectDialog from '../dialogs/AssignEmployeeToProjectDialog';
 import EmployeeDetailsDialog from '../dialogs/EmployeeDetailsDialog';
+import ClearFilters from '../ClearFilters';
 
 const Employees = ({ role }: { role: string }) => {
   const searchParams = useSearchParams();
@@ -139,6 +140,14 @@ const Employees = ({ role }: { role: string }) => {
             placeholder='Filter by role'
             otherClassess='xl:max-w-[220px] max-w-[180px] md:max-w-[200px] py-4'
           />
+          {(searchParams?.get('role') ||
+            searchParams?.get('sort') ||
+            searchParams?.get('dir')) && (
+            <ClearFilters
+              keysToDelete={['role', 'sort', 'dir']}
+              searchParams={searchParams}
+            />
+          )}
         </div>
       </div>
       <div className='md:flex hidden w-full'>

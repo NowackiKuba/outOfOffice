@@ -36,12 +36,16 @@ export const createProject = async ({
 export const getProjects = async ({
   search,
   filter,
+  dir,
+  sort,
 }: {
   search?: string;
   filter?: string;
+  dir?: string;
+  sort?: string;
 }): Promise<TProject[]> => {
   const res = await axios(
-    `http://localhost:8080/projects?search=${search}&filter=${filter}`,
+    `http://localhost:8080/projects?search=${search}&filter=${filter}&sort=${sort}&dir=${dir}`,
     {
       method: 'GET',
     }

@@ -7,15 +7,19 @@ import { getTokenValues } from './auth.actions';
 export const getLeaveRequests = async ({
   search,
   filter,
+  sort,
+  dir,
 }: {
   search?: string;
   filter?: string;
+  sort?: string;
+  dir?: string;
 }): Promise<TLeaveRequest[]> => {
   const { userId, role } = await getTokenValues();
   const res = await axios(
     role === 'employee'
-      ? `http://localhost:8080/leave-requests?search=${search}&filter=${filter}&employeeId=${userId}`
-      : `http://localhost:8080/leave-requests?search=${search}&filter=${filter}`,
+      ? `http://localhost:8080/leave-requests?search=${search}&filter=${filter}&employeeId=${userId}&dir=${dir}&sort=${sort}`
+      : `http://localhost:8080/leave-requests?search=${search}&filter=${filter}&dir=${dir}&sort=${sort}`,
     {
       method: 'GET',
     }

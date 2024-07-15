@@ -19,9 +19,10 @@ import Searchbar from '../Searchbar';
 import { TLeaveRequest } from '@/types';
 import RequestDetails from '../dialogs/RequestDetails';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowDown, ArrowUp } from 'lucide-react';
+import { ArrowDown, ArrowUp, File } from 'lucide-react';
 import { handleSort } from '@/lib/utils';
 import ClearFilters from '../ClearFilters';
+import { format } from 'date-fns';
 
 const ApprovalRequests = ({ role }: { role: string }) => {
   const router = useRouter();
@@ -58,7 +59,7 @@ const ApprovalRequests = ({ role }: { role: string }) => {
             route='/approval-requests'
             placeholder='Search for approval requests'
             iconPosition='left'
-            otherClasses='xl:max-w-[440px] rounded-md'
+            otherClasses='xl:max-w-[440px] w-full rounded-md'
           />
           <FilterSelector
             queryKey='status'
@@ -69,7 +70,7 @@ const ApprovalRequests = ({ role }: { role: string }) => {
               { value: 'Cancelled', label: 'Cancelled' },
             ]}
             placeholder='Filter by status'
-            otherClassess='xl:max-w-[220px] py-4'
+            otherClassess='xl:max-w-[220px] max-w-[180px] py-4'
           />
 
           {(searchParams?.get('sort') || searchParams?.get('status')) && (
@@ -80,7 +81,7 @@ const ApprovalRequests = ({ role }: { role: string }) => {
           )}
         </div>
       </div>
-      <div className='w-full'>
+      <div className='w-full sm:flex hidden'>
         <Table>
           <TableHeader className='bg-muted/50'>
             <TableRow>
@@ -148,6 +149,54 @@ const ApprovalRequests = ({ role }: { role: string }) => {
             ))}
           </TableBody>
         </Table>
+      </div>
+      <div className='sm:hidden flex flex-col gap-2 w-full'>
+        {approvalRequests?.map((r) => (
+          <div
+            onClick={() => {
+              setSelectedRequest(r.leave_request);
+              setIsOpenDetails(true);
+            }}
+            key={r.id}
+            className='sm:w-[calc(50%-8px)] w-full bg-secondary rounded-xl px-2 py-3 flex items-center justify-between'
+          >
+            <div className='flex items-center gap-2'>
+              <div className='h-20 w-20 rounded-md bg-primary/10 text-primary dark:bg-primary/20 dark:text-white flex items-center justify-center'>
+                <File className='h-10 w-10' />
+              </div>
+              <div className='flex flex-col gap-1.5'>
+                <p className='text-lg font-semibold'>
+                  {r?.leave_request?.from?.full_name}&apos;s Request
+                </p>
+                <p className='text-sm'>
+                  {format(
+                    r?.leave_request?.start_date || new Date(),
+                    'dd.MM.yyyy'
+                  )}{' '}
+                  -{' '}
+                  {format(
+                    r?.leave_request?.end_date || new Date(),
+                    'dd.MM.yyyy'
+                  )}
+                </p>
+                <div>
+                  <div
+                    className={`px-2 py-0.5 text-xs max-w-20 rounded-md font-semibold ${
+                      r.status.toLowerCase() === 'new'
+                        ? 'bg-blue-500/10 text-blue-500 dark:bg-blue-500/20 dark:text-blue-200'
+                        : r.status.toLowerCase() === 'cancelled' ||
+                          r.status.toLowerCase() === 'rejected'
+                        ? 'bg-red-500/10 text-red-500 dark:bg-red-500/20 dark:text-red-200'
+                        : 'bg-green-500/10 text-green-500 dark:bg-green-500/20 dark:text-green-200'
+                    }`}
+                  >
+                    <p className='first-letter:uppercase'>{r.status}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
       {selectedRequest && (
         <RequestDetails
