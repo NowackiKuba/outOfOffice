@@ -34,6 +34,8 @@ const LeaveRequests = ({ role }: { role: string }) => {
       'getApprovalRequests',
       { search: searchParams?.get('q') },
       { filter: searchParams?.get('status') },
+      { sort: searchParams?.get('sort') },
+      { dir: searchParams?.get('dir') },
     ],
     queryFn: async () =>
       await getLeaveRequests({
@@ -90,6 +92,8 @@ const LeaveRequests = ({ role }: { role: string }) => {
               { value: 'New', label: 'New' },
               { value: 'Approved', label: 'Approved' },
               { value: 'Rejected', label: 'Rejected' },
+              { value: 'Cancelled', label: 'Cancelled' },
+              { value: 'Submitted', label: 'Submitted' },
             ]}
             placeholder='Filter by status'
             otherClassess='xl:max-w-[220px] w-[180px] py-[21px]'

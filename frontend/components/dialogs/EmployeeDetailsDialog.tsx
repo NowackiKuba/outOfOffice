@@ -34,7 +34,10 @@ const EmployeeDetailsDialog = ({ employee, open, setOpen }: Props) => {
         >
           <DrawerContent className='flex flex-col w-full px-2 pb-2'>
             <div className='flex items-center gap-4 w-full py-3 border-b'>
-              <div className='h-32 w-32 rounded-md bg-secondary'></div>
+              <div className='h-32 w-32 rounded-md bg-primary/10 text-primary dark:bg-primary/20 text-white flex items-center justify-center text-4xl font-bold'>
+                {employee.full_name[0]}
+                {employee.full_name.split(' ')[1][0]}
+              </div>
               <div className='flex flex-col'>
                 <p className='text-2xl font-semibold'>{employee.full_name}</p>
                 <p className='text-lg font-normal'>{employee.email}</p>
@@ -104,7 +107,10 @@ const EmployeeDetailsDialog = ({ employee, open, setOpen }: Props) => {
         >
           <DialogContent className='flex flex-col w-full'>
             <div className='flex items-center gap-4 w-full py-3 border-b'>
-              <div className='h-32 w-32 rounded-md bg-secondary'></div>
+              <div className='h-32 w-32 rounded-md bg-primary/10 text-primary dark:bg-primary/20 text-white flex items-center justify-center text-4xl font-bold'>
+                {employee.full_name[0]}
+                {employee.full_name.split(' ')[1][0]}
+              </div>
               <div className='flex flex-col'>
                 <p className='text-2xl font-semibold'>{employee.full_name}</p>
                 <p className='text-lg font-normal'>{employee.email}</p>

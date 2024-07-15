@@ -14,7 +14,8 @@ func GetApprovalRequests() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		search := ctx.Query("search")
 		filter := ctx.Query("filter")
-		requests, err := models.GetApprovalRequests(search, filter)
+		sort := ctx.Query("sort")
+		requests, err := models.GetApprovalRequests(search, filter, sort)
 
 		if err != nil { 
 			fmt.Println(err)

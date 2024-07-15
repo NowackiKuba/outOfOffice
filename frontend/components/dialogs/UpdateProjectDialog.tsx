@@ -85,7 +85,7 @@ const UpdateProjectDialog = ({ open, setOpen, project }: Props) => {
           }}
         >
           <DrawerContent className='flex flex-col gap-4 w-full px-2 pb-2'>
-            <p className='text-xl font-semibold'>Create Project</p>
+            <p className='text-xl font-semibold'>Update Project</p>
             <div className='flex flex-col gap-0.5 w-full'>
               <Label>Project Type</Label>
               <Input

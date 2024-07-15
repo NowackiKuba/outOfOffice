@@ -6,12 +6,14 @@ import axios from 'axios';
 export const getApprovalRequests = async ({
   search,
   filter,
+  sort,
 }: {
   search?: string;
   filter?: string;
+  sort?: string;
 }): Promise<TApprovalRequest[]> => {
   const res = await axios(
-    `http://localhost:8080/approval-requests?search=${search}&filter=${filter}`,
+    `http://localhost:8080/approval-requests?search=${search}&filter=${filter}&sort=${sort}`,
     {
       method: 'GET',
     }

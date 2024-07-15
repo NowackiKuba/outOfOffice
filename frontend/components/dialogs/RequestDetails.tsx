@@ -88,13 +88,18 @@ const RequestDetails = ({ open, setOpen, request, type }: Props) => {
               <div className='flex items-center gap-2 w-full'>
                 <Dialog>
                   <DialogTrigger
-                    disabled={isPending || request.status !== 'New'}
+                    disabled={
+                      isPending || request.status.toLowerCase() !== 'submitted'
+                    }
                     className='w-full'
                   >
                     <Button
                       className='w-full'
                       variant={'outline'}
-                      disabled={isPending || request.status !== 'New'}
+                      disabled={
+                        isPending ||
+                        request.status.toLowerCase() !== 'submitted'
+                      }
                     >
                       Reject Request
                     </Button>
@@ -108,7 +113,10 @@ const RequestDetails = ({ open, setOpen, request, type }: Props) => {
                     />
                     <Button
                       className='w-full'
-                      disabled={isPending}
+                      disabled={
+                        isPending ||
+                        request.status.toLowerCase() !== 'submitted'
+                      }
                       onClick={() => {
                         manage({
                           id: request.id,
@@ -130,7 +138,9 @@ const RequestDetails = ({ open, setOpen, request, type }: Props) => {
                 </Dialog>
                 <Button
                   className='w-full'
-                  disabled={isPending || request.status !== 'New'}
+                  disabled={
+                    isPending || request.status.toLowerCase() !== 'submitted'
+                  }
                   onClick={() => {
                     manage({
                       id: request.id,
@@ -192,13 +202,18 @@ const RequestDetails = ({ open, setOpen, request, type }: Props) => {
               <div className='flex items-center gap-2 w-full'>
                 <Dialog>
                   <DialogTrigger
-                    disabled={isPending || request.status !== 'New'}
+                    disabled={
+                      isPending || request.status.toLowerCase() !== 'submitted'
+                    }
                     className='w-full'
                   >
                     <Button
                       className='w-full'
                       variant={'outline'}
-                      disabled={isPending || request.status !== 'New'}
+                      disabled={
+                        isPending ||
+                        request.status.toLowerCase() !== 'submitted'
+                      }
                     >
                       Reject Request
                     </Button>
@@ -212,7 +227,10 @@ const RequestDetails = ({ open, setOpen, request, type }: Props) => {
                     />
                     <Button
                       className='w-full'
-                      disabled={isPending}
+                      disabled={
+                        isPending ||
+                        request.status.toLowerCase() !== 'submitted'
+                      }
                       onClick={() => {
                         manage({
                           id: request.id,
@@ -234,7 +252,9 @@ const RequestDetails = ({ open, setOpen, request, type }: Props) => {
                 </Dialog>
                 <Button
                   className='w-full'
-                  disabled={isPending || request.status !== 'New'}
+                  disabled={
+                    isPending || request.status.toLowerCase() !== 'submitted'
+                  }
                   onClick={() => {
                     manage({
                       id: request.id,

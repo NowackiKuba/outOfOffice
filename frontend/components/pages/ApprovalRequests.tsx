@@ -33,11 +33,13 @@ const ApprovalRequests = ({ role }: { role: string }) => {
       'getApprovalRequests',
       { search: searchParams?.get('q') },
       { filter: searchParams?.get('status') },
+      { sort: searchParams?.get('sort') },
     ],
     queryFn: async () =>
       await getApprovalRequests({
         search: searchParams.get('q') ? searchParams?.get('q')! : '',
         filter: searchParams.get('status') ? searchParams?.get('status')! : '',
+        sort: searchParams.get('sort') ? searchParams?.get('sort')! : 'asc',
       }),
   });
   const keysToDelete = [];

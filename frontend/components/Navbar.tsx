@@ -7,7 +7,7 @@ import MobileNav from './MobileNav';
 const Navbar = async () => {
   const data = await getTokenValues();
   return (
-    <div className='flex items-center justify-between w-full py-2 border-b px-3'>
+    <div className='flex items-center justify-between w-full py-4 border-b px-3'>
       <p></p>
       <NavLinks role={data.role} />
       <div className='md:flex hidden'>

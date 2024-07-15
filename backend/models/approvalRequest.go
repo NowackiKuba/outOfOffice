@@ -33,10 +33,25 @@ func (a *ApprovalRequest) Create() error {
 	return err
 }
 
-func GetApprovalRequests(search, filter string) (*[]ApprovalRequest, error) { 
-	query := `SELECT ar.*, a.*, lr.*, f.* FROM approval_requests ar LEFT JOIN employee a ON a.id = ar.approver LEFT JOIN leave_requests lr ON ar.leave_request = lr.id LEFT JOIN employee f ON lr.employee = f.id WHERE ar.id LIKE '%' + @p1 + '%' AND ar.status LIKE '%' + @p2 + '%'`  
+func GetApprovalRequests(search, filter, sort string) (*[]ApprovalRequest, error) { 
 
-	rows, err := db.DB.Query(query, search, filter)
+	var sortDir string
+
+	if sort == "asc" { 
+		sortDir = "ASC"
+	} else if sort == "desc" { 
+		sortDir = "DESC"
+	}
+
+	query := fmt.Sprintf(`SELECT ar.*, a.*, lr.*, f.* 
+FROM approval_requests ar 
+LEFT JOIN employee a ON a.id = ar.approver 
+LEFT JOIN leave_requests lr ON ar.leave_request = lr.id 
+LEFT JOIN employee f ON lr.employee = f.id 
+WHERE ar.id LIKE '%%%s%%' AND ar.status LIKE '%%%s%%' 
+ORDER BY ar.id %s`, search, filter, sortDir)
+
+	rows, err := db.DB.Query(query)
 
 	if err != nil { 
 		return nil, err

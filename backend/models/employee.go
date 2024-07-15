@@ -104,11 +104,11 @@ func GetEmployees(search, filter, sort string,  pageSize, page int64) (*[]Employ
 		return nil, false, err
 	}
 
-	query = `SELECT COUNT(*) FROM employee`
+	query = `SELECT COUNT(*) FROM employee WHERE full_name LIKE @p1 AND role LIKE @p2`
 
 	var totalEmployees int
 
-	err = db.DB.QueryRow(query).Scan(&totalEmployees)
+	err = db.DB.QueryRow(query, fullNameParam, roleParam).Scan(&totalEmployees)
 	fmt.Println(totalEmployees)
 
 	isNext := totalEmployees > int(skipAmount) + len(employees)
