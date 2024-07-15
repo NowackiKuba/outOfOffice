@@ -43,13 +43,19 @@ import { formUrlQuery, removeKeysFromQuery } from '@/lib/utils';
 import AssignEmployeeToProjectDialog from '../dialogs/AssignEmployeeToProjectDialog';
 import EmployeeDetailsDialog from '../dialogs/EmployeeDetailsDialog';
 import ClearFilters from '../ClearFilters';
+import Pagination from '../Pagination';
 
 const Employees = ({ role }: { role: string }) => {
   const searchParams = useSearchParams();
-  const { employees, isLoading } = useEmployees({
+  const { employees, isLoading, isNext } = useEmployees({
     search: searchParams?.get('q') ? searchParams?.get('q')! : '',
     sort: searchParams?.get('sort') ? searchParams?.get('sort')! : '',
+    pageSize: 6,
+    page: searchParams?.get('page') ? +searchParams?.get('page')! : 1,
+    filter: searchParams?.get('role') ? searchParams?.get('role')! : '',
   });
+
+  const isMobile = window.innerWidth < 450;
 
   const [isOpenUpdate, setIsOpenUpdate] = useState<boolean>(false);
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
@@ -115,10 +121,11 @@ const Employees = ({ role }: { role: string }) => {
                 setType('create');
               }}
               variant={'secondary'}
+              size={isMobile ? 'icon' : 'default'}
               className='flex items-center gap-2'
             >
               <UserPlus />
-              <p>Create Employee Account</p>
+              <p className='sm:flex hidden'>Create Employee Account</p>
             </Button>
           )}
         </div>
@@ -150,7 +157,7 @@ const Employees = ({ role }: { role: string }) => {
           )}
         </div>
       </div>
-      <div className='md:flex hidden w-full'>
+      <div className='md:flex flex-col gap-6 hidden w-full'>
         <Table>
           <TableHeader className='bg-muted/50'>
             <TableRow>
@@ -310,109 +317,124 @@ const Employees = ({ role }: { role: string }) => {
             ))}
           </TableBody>
         </Table>
+        <Pagination
+          isNext={isNext ? isNext : false}
+          pageNumber={
+            searchParams?.get('page') ? +searchParams?.get('page')! : 1
+          }
+        />
       </div>
-      <div className='flex items-center flex-wrap w-full gap-1 md:hidden sm:gap-2'>
-        {employees?.map((e) => (
-          <div
-            key={e.id}
-            className='sm:w-[calc(50%-8px)] w-full bg-secondary rounded-xl px-2 py-3 flex items-center justify-between'
-          >
-            <div className='flex items-center gap-2'>
-              <div className='h-16 w-16 rounded-md bg-primary/10 flex items-center justify-center text-primary dark:bg-primary/20 dark:text-blue-200 text-xl font-semibold'>
-                {e.full_name[0]}
-                {e.full_name.split(' ')[1][0]}
+      <div className='flex flex-col gap-2 w-full md:hidden'>
+        <div className='flex items-center flex-wrap w-full gap-1 sm:gap-2'>
+          {employees?.map((e) => (
+            <div
+              key={e.id}
+              className='sm:w-[calc(50%-8px)] w-full bg-secondary rounded-xl px-2 py-3 flex items-center justify-between'
+            >
+              <div className='flex items-center gap-2'>
+                <div className='h-16 w-16 rounded-md bg-primary/10 flex items-center justify-center text-primary dark:bg-primary/20 dark:text-blue-200 text-xl font-semibold'>
+                  {e.full_name[0]}
+                  {e.full_name.split(' ')[1][0]}
+                </div>
+                <div className='flex flex-col'>
+                  <p className='text-lg font-semibold'>{e.full_name}</p>
+                  <p>{e.email}</p>
+                </div>
               </div>
-              <div className='flex flex-col'>
-                <p className='text-lg font-semibold'>{e.full_name}</p>
-                <p>{e.email}</p>
+              <div className='flex '>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size={'icon'} variant={'ghost'}>
+                      <Settings />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {(role === 'admin' || role === 'hr') && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelectedEmployee(e);
+                          setIsOpenUpdate(true);
+                          setType('update');
+                        }}
+                        className='flex text-sm items-center gap-2 cursor-pointer'
+                      >
+                        <Edit3 className='h-4 w-4' />
+                        <p>Update</p>
+                      </DropdownMenuItem>
+                    )}
+                    {(role === 'admin' || role === 'hr') && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          deactivate({
+                            email: e.email,
+                            status:
+                              e.status === 'active' ? 'inactive' : 'active',
+                            fullName: e.full_name,
+                            id: e.id,
+                            partner: e.partner,
+                            position: e.position,
+                            subDivision: e.sub_division,
+                          });
+                        }}
+                        className='flex text-sm items-center gap-2 cursor-pointer'
+                      >
+                        {e.status === 'active' ? (
+                          <>
+                            {isPending ? (
+                              <Loader2 className='h-4 w-4 animate-spin' />
+                            ) : (
+                              <ShieldX className='h-4 w-4' />
+                            )}
+                            <p>Deactivate</p>
+                          </>
+                        ) : (
+                          <>
+                            {isPending ? (
+                              <Loader2 className='h-4 w-4 animate-spin' />
+                            ) : (
+                              <ShieldCheck className='h-4 w-4' />
+                            )}
+                            <p>Activate</p>
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                    )}
+                    {(role === 'admin' || role === 'pm') && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelectedEmployee(e);
+                          setIsOpenDetails(true);
+                        }}
+                        className='flex items-center gap-2 cursor-pointer'
+                      >
+                        <Eye className='h-4 w-4' />
+                        <p>See Details</p>
+                      </DropdownMenuItem>
+                    )}
+                    {(role === 'admin' || role === 'pm') && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelectedEmployee(e);
+                          setIsOpenAssign(true);
+                        }}
+                        className='flex items-center gap-2 cursor-pointer'
+                      >
+                        <File className='h-4 w-4' />
+                        <p>Assign to project</p>
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
-            <div className='flex '>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size={'icon'} variant={'ghost'}>
-                    <Settings />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  {(role === 'admin' || role === 'hr') && (
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setSelectedEmployee(e);
-                        setIsOpenUpdate(true);
-                        setType('update');
-                      }}
-                      className='flex text-sm items-center gap-2 cursor-pointer'
-                    >
-                      <Edit3 className='h-4 w-4' />
-                      <p>Update</p>
-                    </DropdownMenuItem>
-                  )}
-                  {(role === 'admin' || role === 'hr') && (
-                    <DropdownMenuItem
-                      onClick={() => {
-                        deactivate({
-                          email: e.email,
-                          status: e.status === 'active' ? 'inactive' : 'active',
-                          fullName: e.full_name,
-                          id: e.id,
-                          partner: e.partner,
-                          position: e.position,
-                          subDivision: e.sub_division,
-                        });
-                      }}
-                      className='flex text-sm items-center gap-2 cursor-pointer'
-                    >
-                      {e.status === 'active' ? (
-                        <>
-                          {isPending ? (
-                            <Loader2 className='h-4 w-4 animate-spin' />
-                          ) : (
-                            <ShieldX className='h-4 w-4' />
-                          )}
-                          <p>Deactivate</p>
-                        </>
-                      ) : (
-                        <>
-                          {isPending ? (
-                            <Loader2 className='h-4 w-4 animate-spin' />
-                          ) : (
-                            <ShieldCheck className='h-4 w-4' />
-                          )}
-                          <p>Activate</p>
-                        </>
-                      )}
-                    </DropdownMenuItem>
-                  )}
-                  {(role === 'admin' || role === 'pm') && (
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setSelectedEmployee(e);
-                        setIsOpenDetails(true);
-                      }}
-                      className='flex items-center gap-2 cursor-pointer'
-                    >
-                      <Eye className='h-4 w-4' />
-                      <p>See Details</p>
-                    </DropdownMenuItem>
-                  )}
-                  {(role === 'admin' || role === 'pm') && (
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setSelectedEmployee(e);
-                        setIsOpenAssign(true);
-                      }}
-                      className='flex items-center gap-2 cursor-pointer'
-                    >
-                      <File className='h-4 w-4' />
-                      <p>Assign to project</p>
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <Pagination
+          isNext={isNext ? isNext : false}
+          pageNumber={
+            searchParams?.get('page') ? +searchParams?.get('page')! : 1
+          }
+        />
       </div>
       <ManageEmployeeDialog
         open={isOpenUpdate}

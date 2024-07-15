@@ -8,18 +8,27 @@ import { getTokenValues } from './auth.actions';
 export const getCompanyEmployees = async ({
   search,
   sort,
+  filter,
+  page,
+  pageSize,
 }: {
   search?: string;
   sort?: string;
-}): Promise<TEmployee[]> => {
+  filter?: string;
+  page: number;
+  pageSize: number;
+}) => {
   const res = await axios(
-    `http://localhost:8080/employees?search=${search}&sort=${sort}`,
+    `http://localhost:8080/employees?search=${search}&sort=${sort}&page=${page}&pageSize=${pageSize}&filter=${filter}`,
     {
       method: 'GET',
     }
   );
 
-  return res.data.employees;
+  const employees: TEmployee[] = res.data.employees;
+  const isNext: boolean = res.data.isNext;
+
+  return { employees, isNext };
 };
 
 export const createEmployee = async ({

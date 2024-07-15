@@ -47,7 +47,7 @@ func (e *Employee) Create() error {
 }
 
 
-func GetEmployees(search, sort string) (*[]Employee, error) { 
+func GetEmployees(search, filter, sort string,  pageSize, page int64) (*[]Employee, bool, error) { 
 
 	var sortDir string 
 
@@ -57,14 +57,20 @@ func GetEmployees(search, sort string) (*[]Employee, error) {
 		sortDir = "DESC"
 	}
 
-	query := fmt.Sprintf(`SELECT * FROM employee WHERE full_name LIKE @p1 ORDER BY balance %s`, sortDir)
+	skipAmount := (page - 1) * pageSize
 
-	likeParam := "%" + search + "%"
 
-	rows, err := db.DB.Query(query, likeParam)
+	query := `SELECT * FROM employee WHERE full_name LIKE @p1 AND role LIKE @p2 ORDER BY balance %s OFFSET @p3 ROWS FETCH NEXT @p4 ROWS ONLY`
+	query = fmt.Sprintf(query, sortDir)
+
+	fullNameParam := "%" + search + "%"
+	roleParam := "%" + filter + "%"
+
+
+	rows, err := db.DB.Query(query, fullNameParam, roleParam, skipAmount, pageSize)
 
 	if err != nil { 
-		return nil, err
+		return nil, false, err
 	}
 
 	defer rows.Close()
@@ -88,17 +94,26 @@ func GetEmployees(search, sort string) (*[]Employee, error) {
 		)
 
 		if err != nil { 
-			return nil, err
+			return nil, false, err
 		}
 
 		employees = append(employees, employee)
 	}
 
 	if rows.Err() != nil { 
-		return nil, err
+		return nil, false, err
 	}
 
-	return &employees, nil
+	query = `SELECT COUNT(*) FROM employee`
+
+	var totalEmployees int
+
+	err = db.DB.QueryRow(query).Scan(&totalEmployees)
+	fmt.Println(totalEmployees)
+
+	isNext := totalEmployees > int(skipAmount) + len(employees)
+
+	return &employees, isNext, err
 }
 
 func (e *Employee) ValidateCredentials() error { 

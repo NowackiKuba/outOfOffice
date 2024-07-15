@@ -246,7 +246,9 @@ const Projects = ({ role }: { role: string }) => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                          {(role === 'admin' || role === 'pm') && (
+                          {(role === 'admin' ||
+                            role === 'pm' ||
+                            role === 'hr') && (
                             <DropdownMenuItem
                               className='flex gap-2 items-center cursor-pointer'
                               onClick={() => {

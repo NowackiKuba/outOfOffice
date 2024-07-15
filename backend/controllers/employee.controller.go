@@ -37,8 +37,23 @@ func GetCompanyEmployees() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		search := ctx.Query("search")
 		sort := ctx.Query("sort")
+		filter := ctx.Query("filter")
 
-		employees, err := models.GetEmployees(search, sort)
+		page, err := strconv.ParseInt(ctx.Query("page"), 10, 64)
+		
+		if err != nil { 
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse incoming data"})
+			return 
+		}
+
+		pageSize, err := strconv.ParseInt(ctx.Query("pageSize"), 10, 64)
+
+		if err != nil { 
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse incoming data"})
+			return 
+		}
+
+		employees, isNext, err := models.GetEmployees(search, filter, sort, pageSize, page)
 
 		if err != nil { 
 			fmt.Println(err)
@@ -46,7 +61,7 @@ func GetCompanyEmployees() gin.HandlerFunc {
 			return
 		}
 		fmt.Println(employees)
-		ctx.JSON(http.StatusOK, gin.H{"employees": employees})
+		ctx.JSON(http.StatusOK, gin.H{"employees": employees, "isNext": isNext})
 	}
 }
 
