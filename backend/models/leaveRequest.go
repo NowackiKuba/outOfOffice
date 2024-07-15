@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"out-of-office.com/outOfOffice/db"
@@ -82,10 +83,24 @@ func (l *LeaveRequest) ManageRequest() (int64, error) {
 
 }
 
-func GetLeaveRequests(search, filter, employeeId string) (*[]LeaveRequest, error) { 
-	query := `SELECT lr.*, f.* FROM leave_requests lr LEFT JOIN employee f ON lr.employee = f.id WHERE lr.id LIKE '%' + @p1 + '%' AND lr.status LIKE '%' + @p2 + '%' AND f.id LIKE '%' + @p3 + '%'`
+func GetLeaveRequests(search, filter, sort, dir, employeeId string) (*[]LeaveRequest, error) { 
+	var sortDir string
 
-	rows, err := db.DB.Query(query, search, filter, employeeId)
+	if dir == "asc" { 
+		sortDir = "ASC"
+	} else if dir == "desc" { 
+		sortDir = "DESC"
+	}
+
+	query := fmt.Sprintf(`
+        SELECT lr.*, f.*
+        FROM leave_requests lr
+        LEFT JOIN employee f ON lr.employee = f.id
+        WHERE lr.id LIKE '%%%s%%' AND lr.status LIKE '%%%s%%' AND f.id LIKE '%%%s%%'
+        ORDER BY %s %s
+    `, search, filter, employeeId, sort, sortDir)
+
+	rows, err := db.DB.Query(query)
 
 	if err != nil {
 		return nil, err

@@ -37,8 +37,10 @@ func GetProjects() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		search := ctx.Query("search")
 		filter := ctx.Query("filter")
+		sort := ctx.Query("sort")
+		dir := ctx.Query("dir")
 
-		projects, err := models.GetProjects(search, filter)
+		projects, err := models.GetProjects(search, filter, dir, sort)
 
 		if err != nil  {
 			fmt.Println(err)

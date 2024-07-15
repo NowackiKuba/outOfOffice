@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"out-of-office.com/outOfOffice/db"
@@ -55,10 +56,25 @@ func (p *Project) Create() error  {
 }
 
 
-func GetProjects(search, filter string) (*[]Project, error) { 
-	query := `SELECT p.*, pm.* FROM projects p LEFT JOIN employee pm ON p.project_manager = pm.id WHERE p.id LIKE '%' + @p1 + '%' AND p.status LIKE '%' + @p2 + '%'`
+func GetProjects(search, filter, dir, column string) (*[]Project, error) { 
 
-	rows, err := db.DB.Query(query, search, filter)
+	var orderByDirection string
+
+	if dir == "asc" { 
+		orderByDirection = "ASC"
+	} else if dir == "desc" { 
+		orderByDirection = "DESC"
+	}
+
+	query := fmt.Sprintf(`
+    SELECT p.*, pm.*
+    FROM projects p
+    LEFT JOIN employee pm ON p.project_manager = pm.id
+    WHERE p.id LIKE '%%%s%%' AND p.status LIKE '%%%s%%'
+    ORDER BY %s %s
+`, search, filter, column, orderByDirection)
+
+	rows, err := db.DB.Query(query)
 
 	if err != nil { 
 		return nil, err
@@ -143,6 +159,8 @@ func (ep *EmployeeProject) AssignEmployeeToProject() error {
 
 
 func GetEmployeeProjects(id int64) (*[]EmployeeProject, error) { 
+
+
 	query := `SELECT ep.*, p.* FROM employee_projects ep LEFT JOIN projects p ON ep.project_id = p.id WHERE ep.employee_id = @p1`
 
 	rows, err := db.DB.Query(query, id)

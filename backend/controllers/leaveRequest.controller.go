@@ -37,9 +37,11 @@ func GetLeaveRequests() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		search := ctx.Query("search")		
 		filter := ctx.Query("filter")		
+		sort := ctx.Query("sort")		
+		dir := ctx.Query("dir")		
 		employeeId := ctx.Query("employeeId")	
 	
-		requests, err := models.GetLeaveRequests(search, filter, employeeId)
+		requests, err := models.GetLeaveRequests(search, filter, sort, dir, employeeId)
 
 		if err != nil { 
 			fmt.Println(err)
