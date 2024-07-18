@@ -6,6 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// normally goes to .env
 const secretKey = "supersecert"
 
 func GenerateToken(email, role string, userId int32) (string, error) { 
