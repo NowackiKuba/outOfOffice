@@ -227,11 +227,11 @@ const Projects = ({ role }: { role: string }) => {
 
                 <TableCell>
                   <div
-                    className={`rounded-full text-center first-letter:uppercase font-[500] text-xs ${
+                    className={`rounded-md max-w-[100px] text-center first-letter:uppercase font-[500] text-xs ${
                       p.status.toLowerCase() === 'active'
                         ? 'bg-green-500/10 text-green-500 dark:bg-green-500/20 dark:text-green-200'
                         : 'bg-red-500/10 text-red-500 dark:bg-red-500/20 dark:text-red-200'
-                    } px-2 py-0.5`}
+                    } px-4 py-2`}
                   >
                     {p.status}
                   </div>
